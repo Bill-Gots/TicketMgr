@@ -1,0 +1,813 @@
+#include "widget.h"
+#include <QApplication>
+#include <fstream>
+#include <QTextStream>
+#include <QTimer>
+#include <QProgressBar>
+#include <QList>
+#include <QStringList>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QMenu>
+#include <QLineEdit>
+#include <QToolButton>
+#include <QFrame>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QHeaderView>
+#include <QDebug>
+
+const QString mnuStyle = "QPushButton:!pressed{border-image:url(:/new/menu/btnLeft0.jpg)} "
+                         "QPushButton:hover, QPushButton:checked{border-image:url(:/new/menu/btnLeft1.jpg); color:white}";
+
+const QString searchMethod[7] = {"查询车次", "查询站名", "查询时刻", "查询乘车时间", "查询硬座票价", "查询卧铺票价", "查询里程"};
+
+const QString instruct[7] = {"在输入框内输入待查询的内容，点击查询按钮即可查询信息。依次单击表头可以设置内容的升序和降序排列。"
+                            "点击下拉菜单可以更改查询信息的类别。输入\"-\"符号可以查询该符号前后两个值组成的区间，例如300-500。乘车时间按分钟计算。",
+                            "请在下面的输入框内输入待修改的车次：",
+                            "只有在点击“保存修改”按钮后，您的修改才会保存。\n请注意，一次只能修改一个车次的信息。",
+                            "点击站次旁的展开按钮即可察看对该站点的编辑操作。\n请不要在下表中直接编辑或删除起始站和终点站的信息，如要编辑请在上方的输入框编辑。",
+                            "要添加途径站信息，请先添加车次后再在“编辑车次信息”一栏中编辑。",
+                            "请在下面的输入框内输入待删除的车次：",
+                            "请注意，删除操作不可撤销。"};
+
+const QString mnuText[4] = {"车次信息浏览与查询  ", "编辑车次信息  ", "添加或删除车次信息  ", "使用帮助  "};
+
+const QString editButtons[3] = {"插入新站点", "编辑该站点", "删除该站点"};
+
+const QColor changedItemColor(170, 200, 255);
+
+
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    MyWidget w;
+    w.showFullScreen();
+    w.setWindowTitle("12307客运列车信息管理系统");
+    w.setPalette(QPalette(Qt::white));
+    w.setWindowIcon(QIcon(":/ico/PTM.ico"));
+
+    QMessageBox exitBox;
+    exitBox.setWindowTitle("提示");
+    exitBox.setText("您确定要退出吗？");
+    exitBox.setFont(QFont("Microsoft YaHei UI", 10));
+    w.agree = exitBox.addButton("确定", QMessageBox::AcceptRole);
+    exitBox.addButton("取消", QMessageBox::RejectRole);
+    exitBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    exitBox.setIcon(QMessageBox::Question);
+    exitBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+    QObject::connect(&exitBox, &QMessageBox::buttonClicked, &w, &MyWidget::confirmExit);
+
+    MyPushButton btnExit(NULL, &w);
+    btnExit.resize(145, 145);
+    btnExit.move(1750, 22);
+    btnExit.setFlat(true);
+    btnExit.setIconSize(QSize(145, 145));
+    btnExit.setStyleSheet("QPushButton:!hover{border-image:url(:/new/close/exit0.jpg)} "
+                          "QPushButton:hover{border-image:url(:/new/close/exit1.jpg)}");
+    btnExit.show();
+    btnExit.setCursor(QCursor(Qt::PointingHandCursor));
+    QObject::connect(&btnExit, &MyPushButton::clicked, &exitBox, &QMessageBox::show);
+
+    QMessageBox wrongBox;
+    wrongBox.setWindowTitle("错误");
+    wrongBox.setText("数据文件打开失败，请检查数据文件！点击\"确认\"关闭系统。");
+    wrongBox.addButton("确定", QMessageBox::AcceptRole);
+    wrongBox.setFont(QFont("Microsoft YaHei UI", 10));
+    wrongBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    wrongBox.setIcon(QMessageBox::Critical);
+    wrongBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    int total = 0;
+    w.total = &total;
+    std::ifstream infile("data.txt");
+    if(!infile.is_open())
+    {
+        wrongBox.show();
+        w.close();
+        return a.exec();
+    }
+    infile >> total;
+
+    QProgressBar* pgbLoad = new QProgressBar(&w);
+    pgbLoad->resize(1200, 60);
+    pgbLoad->move(400, 510);
+    pgbLoad->setMinimum(0);
+    pgbLoad->setMaximum(2 * total);
+    pgbLoad->setValue(0);
+    double progress = double(pgbLoad->value() - pgbLoad->minimum()) * 100 / (pgbLoad->maximum() - pgbLoad->minimum());
+    pgbLoad->setFormat("车次信息加载中……" + QString::number(progress, 'f', 1) + "%");
+    pgbLoad->setFont(QFont("Microsoft YaHei UI", 16));
+    pgbLoad->setStyleSheet("QProgressBar{background:white; color:black;} QProgressBar::chunk{background:#327bff}");
+    pgbLoad->setAlignment(Qt::AlignCenter);
+    pgbLoad->show();
+
+    train* trains = new train;
+    trains->next = NULL;
+    loadData(trains, total, infile, pgbLoad, progress);
+    w.list = trains;
+    infile.close();
+
+    MyPushButton* btnMenu[4];
+    QButtonGroup* mnu = new QButtonGroup;
+    mnu->setExclusive(true);
+    for(int i = 0; i < 4; i = i + 1)
+    {
+        btnMenu[i] = new MyPushButton(mnuText[i], &w);
+        mnu->addButton(btnMenu[i], i);
+        btnMenu[i]->resize(350, 110);
+        btnMenu[i]->move(0, 188 + i * 110);
+        btnMenu[i]->setFlat(true);
+        btnMenu[i]->setFont(QFont("Microsoft YaHei UI", 18));
+        btnMenu[i]->setCheckable(true);
+        btnMenu[i]->setStyleSheet(mnuStyle);
+        btnMenu[i]->show();
+    }
+
+    MyLabel lblSysTime(&w);
+    lblSysTime.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    lblSysTime.move(5, 1033);
+    lblSysTime.resize(500, 47);
+    lblSysTime.setFont(QFont("Microsoft YaHei UI", 12));
+    lblSysTime.show();
+    QTimer *timer = new QTimer(&w);
+    timer->start(500);
+    QObject::connect(timer, &QTimer::timeout, &lblSysTime, &MyLabel::updateTime);
+
+    MyLabel lblTotal(&w);
+    lblTotal.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    lblTotal.move(500, 1033);
+    lblTotal.resize(300, 47);
+    lblTotal.setFont(QFont("Microsoft YaHei UI", 12));
+    lblTotal.setText("现有车次信息总数：" + QString::number(total));
+    lblTotal.show();
+    lblTotal.total = &total;
+
+    QStringList stlHeader;
+    stlHeader << "车次" << "始发站" << "终点站"
+           << "始发时间" << "终到时间" << "天数"
+           << "硬座票价" << "卧铺票价" << "里程"
+           << "备注";
+    MyTreeWidget* lstTrains = new MyTreeWidget(&w);
+    lstTrains->resize(1567, 732);
+    lstTrains->move(353, 298);
+    lstTrains->setColumnCount(10);
+    lstTrains->setHeaderLabels(stlHeader);
+    lstTrains->setFont(QFont("Microsoft YaHei UI", 14));
+    lstTrains->setUniformRowHeights(false);
+    int numOfResult = 0;
+    lstTrains->numOfResult = &numOfResult;
+    lstTrains->total = &total;
+
+    createTree(trains, pgbLoad, progress, lstTrains, &w);
+    lstTrains->setSortingEnabled(true);
+    MyTreeWidget::head = trains;
+    delete(pgbLoad);
+
+    MyLineEdit* txtSearch = new MyLineEdit(&w);
+    txtSearch->resize(440, 60);
+    txtSearch->move(1260, 215);
+    txtSearch->setFont(QFont("Microsoft YaHei UI", 16));
+    txtSearch->setClearButtonEnabled(true);
+    txtSearch->setMaxLength(40);
+
+    MyPushButton* btnSearch = new MyPushButton(&w);
+    btnSearch->resize(170, 60);
+    btnSearch->move(1710, 215);
+    btnSearch->setIcon(QIcon(":/new/search/btnSearch.png"));
+    btnSearch->setIconSize(QSize(25, 25));
+    btnSearch->setFont(QFont("Microsoft YaHei UI", 12));
+
+    MyPushButton* btnSwitch = new MyPushButton(&w);
+    btnSwitch->resize(20, 60);
+    btnSwitch->move(1880, 215);
+    btnSwitch->actSearchGroup = new QActionGroup(btnSwitch);
+    btnSwitch->actSearchGroup->setExclusive(true);
+    lstTrains->actSearchGroup = btnSwitch->actSearchGroup;
+
+    QMenu* mnuSearch = new QMenu(btnSwitch);
+    mnuSearch->setFont(QFont("Microsoft YaHei UI", 10));
+    QAction* actSearch[7];
+    for(int i = 0; i < 7; i = i + 1)
+    {
+        actSearch[i] = new QAction(mnuSearch);
+        actSearch[i]->setText(searchMethod[i]);
+        actSearch[i]->setCheckable(true);
+        mnuSearch->addAction(actSearch[i]);
+        btnSwitch->actSearchGroup->addAction(actSearch[i]);
+    }
+    btnSwitch->setMenu(mnuSearch);
+
+    btnSearch->actSearchGroup = btnSwitch->actSearchGroup;
+    lstTrains->actSearch = (QAction**)(&actSearch);
+    QObject::connect(btnSwitch->actSearchGroup, QActionGroup::triggered, btnSearch, MyPushButton::changeText);
+    actSearch[0]->trigger();
+
+    btnSearch->QPushButton::setEnabled(false);
+    btnSwitch->QPushButton::setEnabled(false);
+    QObject::connect(txtSearch, &MyLineEdit::textChanged, txtSearch, &MyLineEdit::emitIsEmpty);
+    QObject::connect(txtSearch, &MyLineEdit::isEmpty, btnSearch, &MyPushButton::changeState);
+    QObject::connect(txtSearch, &MyLineEdit::isEmpty, btnSwitch, &MyPushButton::changeState);
+
+    MyPushButton* btnBack = new MyPushButton("返回", &w);
+    btnBack->resize(120, 60);
+    btnBack->move(375, 215);
+    btnBack->setFont(QFont("Microsoft YaHei UI", 14));
+    btnBack->setIcon(QIcon(":/new/back/btnBack.png"));
+    btnBack->setIconSize(QSize(20, 20));
+    btnBack->setDisabled();
+
+    MyLabel* lblSearch = new MyLabel(&w);
+    lblSearch->resize(725, 100);
+    lblSearch->move(520, 195);
+    lblSearch->setText(instruct[0]);
+    lblSearch->setFont(QFont("Microsoft YaHei UI", 12));
+    lblSearch->setWordWrap(true);
+    lblSearch->numOfResult = &numOfResult;
+
+    QMessageBox wrongInputBox[3];
+    wrongInputBox[0].setWindowTitle("输入错误");
+    wrongInputBox[0].setText("请重新检查输入内容，尤其注意以下事项：\n"
+                             "一、车次和时刻应尽量输入完整，例如G2922、13:50。\n"
+                             "二、不应输入两个以上的“-”符号或任何数量的空格。\n"
+                             "三、检查搜索类别是否正确。");
+    wrongInputBox[0].addButton("确定", QMessageBox::AcceptRole);
+    wrongInputBox[0].setFont(QFont("Microsoft YaHei UI", 10));
+    wrongInputBox[0].setWindowIcon(QIcon(":/ico/PTM.ico"));
+    wrongInputBox[0].setIcon(QMessageBox::Critical);
+    wrongInputBox[0].setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    QObject::connect(btnSearch, &MyPushButton::clicked, txtSearch, &MyLineEdit::emitText);
+    QObject::connect(txtSearch, &MyLineEdit::returnPressed, txtSearch, &MyLineEdit::emitText);
+    QObject::connect(lstTrains, &MyTreeWidget::wrongInput, &wrongInputBox[0], &QMessageBox::show);
+    QObject::connect(txtSearch, &MyLineEdit::sendText, lstTrains, &MyTreeWidget::searchAndShowResult);
+    QObject::connect(lstTrains, &MyTreeWidget::searchFinished, lblSearch, &MyLabel::changeText);
+    QObject::connect(lstTrains, &MyTreeWidget::searchFinished, btnBack, &MyPushButton::setEnabled);
+    QObject::connect(btnBack, &MyPushButton::clicked, lstTrains, &MyTreeWidget::back);
+    QObject::connect(btnBack, &MyPushButton::clicked, btnBack, &MyPushButton::setDisabled);
+    QObject::connect(btnBack, &MyPushButton::clicked, lblSearch, &MyLabel::back);
+
+    MyLabel* lblEdit = new MyLabel(&w);
+    lblEdit->resize(440, 45);
+    lblEdit->move(370, 185);
+    lblEdit->setText(instruct[1]);
+    lblEdit->setFont(QFont("Microsoft YaHei UI", 14));
+    lblEdit->setWordWrap(true);
+
+    MyLineEdit* txtEdit = new MyLineEdit(&w);
+    txtEdit->resize(440, 60);
+    txtEdit->move(370, 230);
+    txtEdit->setFont(QFont("Microsoft YaHei UI", 16));
+    txtEdit->setClearButtonEnabled(true);
+    txtEdit->setMaxLength(40);
+
+    MyPushButton* btnEdit = new MyPushButton(&w);
+    btnEdit->resize(130, 60);
+    btnEdit->move(815, 230);
+    btnEdit->setText("查找并编辑");
+    btnEdit->setFont(QFont("Microsoft YaHei UI", 12));
+    btnEdit->setDisabled();
+
+    MyLabel* lblSave = new MyLabel(&w);
+    lblSave->resize(600, 60);
+    lblSave->move(1050, 210);
+    lblSave->setText(instruct[2]);
+    lblSave->setFont(QFont("Microsoft YaHei UI", 14));
+    lblSave->setWordWrap(true);
+
+    wrongInputBox[1].setWindowTitle("输入错误");
+    wrongInputBox[1].setText("请重新检查输入内容，尤其注意输入车次和时刻时应尽量输入完整，例如G2922、13:50。");
+    wrongInputBox[1].addButton("确定", QMessageBox::AcceptRole);
+    wrongInputBox[1].setFont(QFont("Microsoft YaHei UI", 10));
+    wrongInputBox[1].setWindowIcon(QIcon(":/ico/PTM.ico"));
+    wrongInputBox[1].setIcon(QMessageBox::Critical);
+    wrongInputBox[1].setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    MyPushButton* btnSave = new MyPushButton(&w);
+    btnSave->resize(200, 85);
+    btnSave->move(1700, 200);
+    btnSave->setText("保存修改");
+    btnSave->setFont(QFont("Microsoft YaHei UI", 16));
+    btnSave->setIcon(QIcon(":/new/save/btnSave.png"));
+    btnSave->setIconSize(QSize(30, 30));
+    btnSave->QPushButton::setDisabled(true);
+
+    MyFrame* lneEdit1 = new MyFrame(&w);
+    lneEdit1->move(353, 298);
+    lneEdit1->resize(1567, 3);
+    lneEdit1->setLineWidth(3);
+    lneEdit1->setFrameShape(QFrame::HLine);
+    lneEdit1->setFrameShadow(QFrame::Plain);
+    lneEdit1->setStyleSheet("color:#0076e4");
+
+    QMessageBox noFoundBox;
+    noFoundBox.setWindowTitle("未找到车次");
+    noFoundBox.setText("没有找到该车次的信息，请重新输入！");
+    noFoundBox.addButton("确定", QMessageBox::AcceptRole);
+    noFoundBox.setFont(QFont("Microsoft YaHei UI", 10));
+    noFoundBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    noFoundBox.setIcon(QMessageBox::Critical);
+    noFoundBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    MyLabel* lblNo = new MyLabel(&w);
+    lblNo->resize(440, 45);
+    lblNo->move(370, 305);
+    lblNo->setText("");
+    lblNo->setFont(QFont("Microsoft YaHei UI", 14));
+    lblNo->setWordWrap(true);
+
+    MyLabel* lblTrainEdit[10]; MyLineEdit* txtTrainEdit[10];
+    for(int i = 0; i < 10; i = i + 1)
+    {
+        lblTrainEdit[i] = new MyLabel(&w);
+        lblTrainEdit[i]->resize(200, 50);
+        lblTrainEdit[i]->move(400 + (i % 3) * 460, 360 + (i / 3) * 65);
+        lblTrainEdit[i]->setText(lstTrains->headerItem()->text(i) + "：");
+        lblTrainEdit[i]->setFont(QFont("Microsoft YaHei UI", 16));
+        lblTrainEdit[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        txtTrainEdit[i] = new MyLineEdit(&w);
+        txtTrainEdit[i]->resize(220, 50);
+        txtTrainEdit[i]->move(lblTrainEdit[i]->x() + lblTrainEdit[i]->width(), lblTrainEdit[i]->y());
+        txtTrainEdit[i]->setFont(QFont("Microsoft YaHei UI", 16));
+        txtTrainEdit[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        txtTrainEdit[i]->id = i;
+        txtTrainEdit[i]->setDisabled();
+        txtTrainEdit[i]->setMaxLength(20);
+    }
+    txtTrainEdit[9]->resize(txtTrainEdit[8]->x() + txtTrainEdit[8]->width() - txtTrainEdit[9]->x(), 50);
+    txtTrainEdit[9]->setMaxLength(100);
+    txtTrainEdit[9]->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    txtTrainEdit[0]->edit = true;
+    MyLineEdit::list = lstTrains;
+
+    wrongInputBox[2].setWindowTitle("输入错误");
+    wrongInputBox[2].setText("请重新检查输入内容，尤其注意输入车次和时刻时应尽量输入完整，例如G2922、13:50。"
+                             "此外，还应注意输入的信息（比如开车时间）是否在正确的位置、是否有合理的逻辑顺序。");
+    wrongInputBox[2].addButton("确定", QMessageBox::AcceptRole);
+    wrongInputBox[2].setFont(QFont("Microsoft YaHei UI", 10));
+    wrongInputBox[2].setWindowIcon(QIcon(":/ico/PTM.ico"));
+    wrongInputBox[2].setIcon(QMessageBox::Critical);
+    wrongInputBox[2].setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    QMessageBox conflictNoBox;
+    conflictNoBox.setWindowTitle("错误");
+    conflictNoBox.setText("数据列表中已经存在该车次号，请修改车次号避免冲突。");
+    conflictNoBox.setFont(QFont("Microsoft YaHei UI", 10));
+    conflictNoBox.addButton("确定", QMessageBox::AcceptRole);
+    conflictNoBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    conflictNoBox.setIcon(QMessageBox::Critical);
+    conflictNoBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    MyLabel* lblStationsInfo = new MyLabel(&w);
+    lblStationsInfo->resize(220, 40);
+    lblStationsInfo->move(370, 695);
+    lblStationsInfo->setText("途经站列表：");
+    lblStationsInfo->setFont(QFont("Microsoft YaHei UI", 16));
+    lblStationsInfo->setWordWrap(true);
+    lblStationsInfo->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+    MyLabel* lblCheckOperation = new MyLabel(&w);
+    lblCheckOperation->resize(1000, 80);
+    lblCheckOperation->move(600, 610);
+    lblCheckOperation->setText(instruct[3]);
+    lblCheckOperation->setFont(QFont("Microsoft YaHei UI", 14));
+    lblCheckOperation->setWordWrap(true);
+
+    QStringList stlStationHeader;
+    stlStationHeader << "站次" << "站名"
+                     << "到达时间" << "开车时间"
+                     << "天数" << "里程" << "备注";
+    MyTreeWidget* lstStations = new MyTreeWidget(&w);
+    lstStations->resize(1150, 315);
+    lstStations->move(600, 695);
+    lstStations->setColumnCount(7);
+    lstStations->setHeaderLabels(stlStationHeader);
+    lstStations->setFont(QFont("Microsoft YaHei UI", 12));
+    lstStations->setDisabled();
+    lstStations->btnSave = btnSave;
+
+    QObject::connect(txtEdit, &MyLineEdit::textChanged, txtEdit, &MyLineEdit::emitIsEmpty);
+    QObject::connect(txtEdit, &MyLineEdit::isEmpty, btnEdit, &MyPushButton::changeState);
+    QObject::connect(btnEdit, &MyPushButton::clicked, txtEdit, &MyLineEdit::emitTextNo);
+    QObject::connect(txtEdit, &MyLineEdit::returnPressed, txtEdit, &MyLineEdit::emitTextNo);
+    QObject::connect(txtEdit, &MyLineEdit::wrongInput, &wrongInputBox[1], &QMessageBox::show);
+    QObject::connect(txtEdit, &MyLineEdit::sendTextNo, lstTrains, &MyTreeWidget::searchNo);
+    QObject::connect(lstTrains, &MyTreeWidget::searchFound, lblNo, &MyLabel::changeNo);
+    QObject::connect(lstTrains, &MyTreeWidget::searchFound, lstStations, &MyTreeWidget::setEnabled);
+    QObject::connect(lstTrains, &MyTreeWidget::searchFound, lstStations, &MyTreeWidget::showResultList);
+    QObject::connect(lstTrains, &MyTreeWidget::searchNoFound, &noFoundBox, &QMessageBox::show);
+    for(int i = 0; i < 10; i = i + 1)
+    {
+        QObject::connect(lstTrains, &MyTreeWidget::searchFound, txtTrainEdit[i], &MyLineEdit::setEnabled);
+        QObject::connect(lstTrains, &MyTreeWidget::searchFound, txtTrainEdit[i], &MyLineEdit::showInfo);
+        QObject::connect(txtTrainEdit[i], &MyLineEdit::textEdited, btnSave, &MyPushButton::setEnabled);
+        QObject::connect(txtTrainEdit[i], &MyLineEdit::textEdited, txtTrainEdit[i], &MyLineEdit::emitEditTextAndId);
+        QObject::connect(txtTrainEdit[i], &MyLineEdit::sendEditTextAndId, lstStations, &MyTreeWidget::changeFirstAndLastStation);
+
+        QObject::connect(btnSave, &MyPushButton::clicked, txtTrainEdit[i], &MyLineEdit::checkTextAndId1);
+        QObject::connect(txtTrainEdit[i], &MyLineEdit::wrongInput, &wrongInputBox[2], &QMessageBox::show);
+        QObject::connect(txtTrainEdit[i], &MyLineEdit::checkPassed, lstStations, &MyTreeWidget::checkAll);
+    }
+    QObject::connect(txtTrainEdit[0], &MyLineEdit::conflictInput, &conflictNoBox, &QMessageBox::show);
+
+    lstStations->wEdit = new MyWidget;
+    lstStations->wEdit->resize(810, 340);
+    lstStations->wEdit->move(450, 200);
+    lstStations->wEdit->setFixedSize(QSize(810, 340));
+    lstStations->wEdit->setWindowTitle("*");
+    lstStations->wEdit->setPalette(QPalette(Qt::white));
+    lstStations->wEdit->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    lstStations->wEdit->removeAllObject();
+    lstStations->wEdit->setWindowModality(Qt::ApplicationModal);//保持子窗口最顶端并使主窗口失去焦点
+    w.setAttribute(Qt::WA_QuitOnClose, true);//主窗口关闭其他窗口全部关闭
+    lstStations->wEdit->setAttribute(Qt::WA_QuitOnClose, false);
+
+    MyLabel* lblStationEdit[7]; MyLineEdit* txtStationEdit[7];
+    for(int i = 0; i < 6; i = i + 1)
+    {
+        lblStationEdit[i] = new MyLabel(lstStations->wEdit);
+        lblStationEdit[i]->resize(170, 45);
+        lblStationEdit[i]->move(10 + 350 * (i % 2), 20 + 60 * (i / 2));
+        lblStationEdit[i]->setText(stlStationHeader.takeFirst() + "：");
+        lblStationEdit[i]->setFont(QFont("Microsoft YaHei UI", 14));
+        lblStationEdit[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        txtStationEdit[i] = new MyLineEdit(lstStations->wEdit);
+        txtStationEdit[i]->resize(150, 45);
+        txtStationEdit[i]->move(lblStationEdit[i]->x() + lblStationEdit[i]->width(), lblStationEdit[i]->y());
+        txtStationEdit[i]->setFont(QFont("Microsoft YaHei UI", 14));
+        txtStationEdit[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        txtStationEdit[i]->id = i;
+        txtStationEdit[i]->setMaxLength(20);
+    }
+    lblStationEdit[6] = new MyLabel(lstStations->wEdit);
+    lblStationEdit[6]->resize(170, 45);
+    lblStationEdit[6]->move(lblStationEdit[4]->x(), lblStationEdit[4]->y() + 60);
+    lblStationEdit[6]->setText(stlStationHeader.takeFirst() + "：");
+    lblStationEdit[6]->setFont(QFont("Microsoft YaHei UI", 14));
+    lblStationEdit[6]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    txtStationEdit[6] = new MyLineEdit(lstStations->wEdit);
+    txtStationEdit[6]->resize(500, 45);
+    txtStationEdit[6]->move(lblStationEdit[6]->x() + lblStationEdit[6]->width(), lblStationEdit[6]->y());
+    txtStationEdit[6]->setFont(QFont("Microsoft YaHei UI", 14));
+    txtStationEdit[6]->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    txtStationEdit[6]->id = 6;
+    txtStationEdit[6]->setMaxLength(20);
+
+    MyPushButton* btnEditConfirm = new MyPushButton(lstStations->wEdit);
+    btnEditConfirm->resize(120, 60);
+    btnEditConfirm->move(550, 260);
+    btnEditConfirm->setText("确认");
+    btnEditConfirm->setFont(QFont("Microsoft YaHei UI", 16));
+
+    MyPushButton* btnEditCancel = new MyPushButton(lstStations->wEdit);
+    btnEditCancel->resize(120, 60);
+    btnEditCancel->move(680, 260);
+    btnEditCancel->setText("取消");
+    btnEditCancel->setFont(QFont("Microsoft YaHei UI", 16));
+
+    QObject::connect(btnEditConfirm, &MyPushButton::clicked, btnSave, &MyPushButton::setEnabled);
+    QObject::connect(btnEditCancel, &MyPushButton::clicked, lstStations->wEdit, &MyWidget::close);
+    for(int i = 0; i < 7; i = i + 1)
+    {
+        QObject::connect(lstStations, &MyTreeWidget::sendStation, txtStationEdit[i], &MyLineEdit::showStation);
+        QObject::connect(btnEditConfirm, &MyPushButton::clicked, txtStationEdit[i], &MyLineEdit::checkTextAndId2);
+        QObject::connect(txtStationEdit[i], &MyLineEdit::wrongInput, &wrongInputBox[2], &QMessageBox::show);
+
+        for(int j = 0; j < 7; j = j + 1)
+        {
+            QObject::connect(txtStationEdit[i], &MyLineEdit::checkPassed, txtStationEdit[j], &MyLineEdit::emitTextAndId);
+        }
+
+        QObject::connect(txtStationEdit[i], &MyLineEdit::sendTextAndId, lstStations, &MyTreeWidget::receiveAndShowStation);
+
+    }
+    QObject::connect(lstStations, &MyTreeWidget::received, lstStations->wEdit, &MyWidget::close);
+
+    QMessageBox editSuccessBox;
+    editSuccessBox.setWindowTitle("保存成功");
+    editSuccessBox.setText("您的修改已经成功保存！");
+    editSuccessBox.addButton("确定", QMessageBox::AcceptRole);
+    editSuccessBox.setFont(QFont("Microsoft YaHei UI", 10));
+    editSuccessBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    editSuccessBox.setIcon(QMessageBox::Information);
+    editSuccessBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    QObject::connect(btnSave, &MyPushButton::clicked, lstStations, &MyTreeWidget::checkStation);
+    QObject::connect(lstStations, &MyTreeWidget::wrongInput, &wrongInputBox[2], &QMessageBox::show);
+    QObject::connect(lstStations, &MyTreeWidget::checkStationSuccess, lstStations, &MyTreeWidget::checkAll);
+    QObject::connect(lstStations, &MyTreeWidget::checkAllSuccess, &editSuccessBox, &QMessageBox::show);
+    for(int i = 0; i < 10; i = i + 1)
+    {
+        QObject::connect(lstStations, &MyTreeWidget::checkAllSuccess, txtTrainEdit[i], &MyLineEdit::emitTextAndId);
+        QObject::connect(txtTrainEdit[i], &MyLineEdit::sendTextAndId, lstTrains, &MyTreeWidget::setTrain);
+    }
+    QObject::connect(lstTrains, &MyTreeWidget::trainIsSet, lstStations, &MyTreeWidget::emitList);
+    QObject::connect(lstStations, &MyTreeWidget::sendList, lstTrains, &MyTreeWidget::setStation);
+
+    MyPushButton* btnAdd = new MyPushButton(&w);
+    btnAdd->resize(240, 441);
+    btnAdd->move(351, 188);
+    btnAdd->setFont(QFont("Microsoft YaHei UI", 18));
+    btnAdd->setIcon(QIcon(":/new/add/btnAdd.png"));
+    btnAdd->setIconSize(QSize(80, 200));
+
+    MyLabel* lblNew[10]; MyLineEdit* txtNew[10];
+    for(int i = 0; i < 10; i = i + 1)
+    {
+        lblNew[i] = new MyLabel(&w);
+        lblNew[i]->resize(180, 50);
+        lblNew[i]->move(620 + (i % 3) * 400, 230 + (i / 3) * 80);
+        lblNew[i]->setText(lstTrains->headerItem()->text(i) + "：");
+        lblNew[i]->setFont(QFont("Microsoft YaHei UI", 18));
+        lblNew[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        txtNew[i] = new MyLineEdit(&w);
+        txtNew[i]->resize(170, 50);
+        txtNew[i]->move(lblNew[i]->x() + lblNew[i]->width(), lblNew[i]->y());
+        txtNew[i]->setFont(QFont("Microsoft YaHei UI", 18));
+        txtNew[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        txtNew[i]->id = i;
+        txtNew[i]->setMaxLength(20);
+
+    }
+    txtNew[9]->resize(txtNew[8]->x() + txtNew[8]->width() - txtNew[9]->x(), 50);
+    txtNew[9]->setMaxLength(100);
+    txtNew[9]->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    QObject::connect(txtNew[0], &MyLineEdit::conflictInput, &conflictNoBox, &QMessageBox::show);
+
+    MyLabel* lblAddStationInstuct = new MyLabel(&w);
+    lblAddStationInstuct->resize(750, 40);
+    lblAddStationInstuct->move(875, 560);
+    lblAddStationInstuct->setText(instruct[4]);
+    lblAddStationInstuct->setFont(QFont("Microsoft YaHei UI", 14));
+    lblAddStationInstuct->setWordWrap(true);
+
+    QMessageBox addSuccessBox;
+    addSuccessBox.setWindowTitle("添加成功");
+    addSuccessBox.setText("您已经成功添加了车次信息！");
+    addSuccessBox.addButton("确定", QMessageBox::AcceptRole);
+    addSuccessBox.setFont(QFont("Microsoft YaHei UI", 10));
+    addSuccessBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    addSuccessBox.setIcon(QMessageBox::Information);
+    addSuccessBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    for(int i = 0; i < 10; i = i + 1)
+    {
+        QObject::connect(btnAdd, &MyPushButton::clicked, txtNew[i], &MyLineEdit::checkTextAndId1);
+        QObject::connect(txtNew[i], &MyLineEdit::wrongInput, &wrongInputBox[2], &QMessageBox::show);
+        for(int j = 0; j < 10; j = j + 1)
+        {
+            QObject::connect(txtNew[i], &MyLineEdit::checkPassed, txtNew[j], &MyLineEdit::emitTextAndId);
+        }
+        QObject::connect(txtNew[i], &MyLineEdit::sendTextAndId, lstTrains, &MyTreeWidget::addNewTrain);
+        QObject::connect(&addSuccessBox, &QMessageBox::buttonClicked, txtNew[i], &MyLineEdit::clear);
+    }
+    QObject::connect(lstTrains, &MyTreeWidget::reverseInput, &wrongInputBox[2], &QMessageBox::show);
+    QObject::connect(lstTrains, &MyTreeWidget::trainCreated, &addSuccessBox, &QMessageBox::show);
+    QObject::connect(lstTrains, &MyTreeWidget::trainCreated, &lblTotal, &MyLabel::updateTotal);
+
+    MyFrame* lneNewAndDel = new MyFrame(&w);
+    lneNewAndDel->move(353, 628);
+    lneNewAndDel->resize(1567, 3);
+    lneNewAndDel->setLineWidth(3);
+    lneNewAndDel->setFrameShape(QFrame::HLine);
+    lneNewAndDel->setFrameShadow(QFrame::Plain);
+    lneNewAndDel->setStyleSheet("color:#0076e4");
+
+    MyLabel* lblDel = new MyLabel(&w);
+    lblDel->resize(440, 40);
+    lblDel->move(420, 650);
+    lblDel->setText(instruct[5]);
+    lblDel->setFont(QFont("Microsoft YaHei UI", 14));
+    lblDel->setWordWrap(true);
+
+    MyLineEdit* txtDel = new MyLineEdit(&w);
+    txtDel->resize(300, 60);
+    txtDel->move(420, 700);
+    txtDel->setFont(QFont("Microsoft YaHei UI", 16));
+    txtDel->setClearButtonEnabled(true);
+    txtDel->setMaxLength(40);
+
+    MyPushButton* btnSearchDel = new MyPushButton(&w);
+    btnSearchDel->resize(130, 60);
+    btnSearchDel->move(720, 700);
+    btnSearchDel->setText("查找车次");
+    btnSearchDel->setFont(QFont("Microsoft YaHei UI", 12));
+    btnSearchDel->setDisabled();
+
+    MyLabel* lblDelInfo[10], * lblDelInfoText[10];
+    for(int i = 0; i < 10; i = i + 1)
+    {
+        lblDelInfo[i] = new MyLabel(&w);
+        lblDelInfo[i]->resize(180, 40);
+        lblDelInfo[i]->move(400 + (i % 3) * 430, 780 + (i / 3) * 60);
+        lblDelInfo[i]->setText(lstTrains->headerItem()->text(i) + "：");
+        lblDelInfo[i]->setFont(QFont("Microsoft YaHei UI", 16));
+        lblDelInfo[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        lblDelInfoText[i] = new MyLabel(&w);
+        lblDelInfoText[i]->resize(150, 40);
+        lblDelInfoText[i]->move(lblDelInfo[i]->x() + lblDelInfo[i]->width(), lblDelInfo[i]->y());
+        lblDelInfoText[i]->setText("");
+        lblDelInfoText[i]->setFont(QFont("Microsoft YaHei UI", 16));
+        lblDelInfoText[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        lblDelInfoText[i]->id = i;
+    }
+    lblDelInfoText[9]->resize(lblDelInfoText[8]->x() + lblDelInfoText[8]->width() - lblDelInfoText[9]->x(), 50);
+    lblDelInfoText[9]->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    MyLabel* lblDelCaution = new MyLabel(&w);
+    lblDelCaution->resize(400, 60);
+    lblDelCaution->move(1000, 680);
+    lblDelCaution->setText(instruct[6]);
+    lblDelCaution->setFont(QFont("Microsoft YaHei UI", 16));
+
+    MyPushButton* btnDel = new MyPushButton(&w);
+    btnDel->resize(240 ,400);
+    btnDel->move(1680, 630);
+    btnDel->setFont(QFont("Microsoft YaHei UI", 18));
+    btnDel->setIcon(QIcon(":/new/del/btnDel.png"));
+    btnDel->setIconSize(QSize(80, 200));
+    btnDel->setDisabled();
+
+    QMessageBox deleteTrainBox;
+    deleteTrainBox.setWindowTitle("确认删除车次信息");
+    deleteTrainBox.setText("您确定要删除该车次信息？");
+    deleteTrainBox.setFont(QFont("Microsoft YaHei UI", 10));
+    lstTrains->deleteTrainConfirm = deleteTrainBox.addButton("确定", QMessageBox::AcceptRole);
+    deleteTrainBox.addButton("取消", QMessageBox::RejectRole);
+    deleteTrainBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    deleteTrainBox.setIcon(QMessageBox::Question);
+    deleteTrainBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    QMessageBox delTrainSuccessBox;
+    delTrainSuccessBox.setWindowTitle("删除成功");
+    delTrainSuccessBox.setText("您已成功删除该车次信息！");
+    delTrainSuccessBox.setFont(QFont("Microsoft YaHei UI", 10));
+    delTrainSuccessBox.addButton("确定", QMessageBox::AcceptRole);
+    delTrainSuccessBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    delTrainSuccessBox.setIcon(QMessageBox::Information);
+    delTrainSuccessBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    QMessageBox delTrainConflictBox;
+    delTrainConflictBox.setWindowTitle("错误");
+    delTrainConflictBox.setText("您正在编辑该车次信息，暂不能删除！");
+    delTrainConflictBox.setFont(QFont("Microsoft YaHei UI", 10));
+    delTrainConflictBox.addButton("确定", QMessageBox::AcceptRole);
+    delTrainConflictBox.setWindowIcon(QIcon(":/ico/PTM.ico"));
+    delTrainConflictBox.setIcon(QMessageBox::Critical);
+    delTrainConflictBox.setWindowModality(Qt::ApplicationModal);//直到关闭提示框才使主窗口恢复焦点
+
+    QObject::connect(txtDel, &MyLineEdit::textChanged, txtDel, &MyLineEdit::emitIsEmpty);
+    QObject::connect(txtDel, &MyLineEdit::isEmpty, btnSearchDel, &MyPushButton::changeState);
+    QObject::connect(btnSearchDel, &MyPushButton::clicked, txtDel, &MyLineEdit::emitTextNo);
+    QObject::connect(txtDel, &MyLineEdit::returnPressed, txtDel, &MyLineEdit::emitTextNo);
+    QObject::connect(txtDel, &MyLineEdit::wrongInput, &wrongInputBox[1], &QMessageBox::show);
+    QObject::connect(txtDel, &MyLineEdit::sendTextNo, lstTrains, &MyTreeWidget::searchDel);
+    QObject::connect(lstTrains, &MyTreeWidget::conflictDelNumber, &delTrainConflictBox, &QMessageBox::show);
+    QObject::connect(lstTrains, &MyTreeWidget::delFound, btnDel, &MyPushButton::setEnabled);
+    for(int i = 0 ; i < 10; i = i + 1)
+    {
+        QObject::connect(lstTrains, &MyTreeWidget::delFound, lblDelInfoText[i], &MyLabel::showInfo);
+    }
+    QObject::connect(lstTrains, &MyTreeWidget::delFound, btnDel, &MyPushButton::setEnabled);
+    QObject::connect(lstTrains, &MyTreeWidget::delNoFound, &noFoundBox, &QMessageBox::show);
+    QObject::connect(btnDel, &MyPushButton::clicked, &deleteTrainBox, &QMessageBox::show);
+    QObject::connect(&deleteTrainBox, &QMessageBox::buttonClicked, lstTrains, &MyTreeWidget::confirmDeleteTrain);
+    QObject::connect(lstTrains, &MyTreeWidget::trainDeleted, &delTrainSuccessBox, &QMessageBox::show);
+    QObject::connect(lstTrains, &MyTreeWidget::trainDeleted, &lblTotal, &MyLabel::updateTotal);
+    QObject::connect(lstTrains, &MyTreeWidget::trainDeleted, txtDel, &MyLineEdit::clear);
+    QObject::connect(lstTrains, &MyTreeWidget::trainDeleted, btnDel, &MyPushButton::setDisabled);
+
+    MyTreeWidget* lstHelp = new MyTreeWidget(&w);
+    lstHelp->resize(1450, 700);
+    lstHelp->move(400, 230);
+    lstHelp->setColumnCount(1);
+    lstHelp->setHeaderHidden(true);
+    lstHelp->setFont(QFont("华文中宋", 16));
+    loadHelp(lstHelp);
+
+    MyLabel* lblContact = new MyLabel(&w);
+    lblContact->resize(1050, 45);
+    lblContact->move(600, 950);
+    lblContact->setText("如果帮助仍然无法解决疑问，或者发现了软件bug，请联系官方邮箱aksldhfjg@163.com进行处理。");
+    lblContact->setFont(QFont("Microsoft YaHei UI", 14));
+
+    for(int i = 0; i < 4; i = i + 1)
+    {
+        if(i == 0)
+        {
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lstTrains, &MyTreeWidget::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblSearch, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, txtSearch, &MyLineEdit::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSearch, &MyPushButton::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSwitch, &MyPushButton::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnBack, &MyPushButton::show);
+            continue;
+        }
+
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lstTrains, &MyTreeWidget::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblSearch, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, txtSearch, &MyLineEdit::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSearch, &MyPushButton::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSwitch, &MyPushButton::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnBack, &MyPushButton::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnBack, &MyPushButton::click);
+    }
+
+    for(int i = 0; i < 4; i = i + 1)
+    {
+        if(i == 1)
+        {
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblEdit, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, txtEdit, &MyLineEdit::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnEdit, &MyPushButton::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblSave, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSave, &MyPushButton::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lneEdit1, &MyFrame::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblNo, &MyLabel::show);
+            for(int j = 0; j < 10; j = j + 1)
+            {
+                QObject::connect(btnMenu[i], &MyPushButton::clicked, lblTrainEdit[j], &MyLabel::show);
+                QObject::connect(btnMenu[i], &MyPushButton::clicked, txtTrainEdit[j], &MyLineEdit::show);
+            }
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblCheckOperation, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lstStations, &MyTreeWidget::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblStationsInfo, &MyLabel::show);
+            continue;
+        }
+
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblEdit, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, txtEdit, &MyLineEdit::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnEdit, &MyPushButton::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblSave, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSave, &MyPushButton::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lneEdit1, &MyFrame::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblNo, &MyLabel::setHidden);
+        for(int j = 0; j < 10; j = j + 1)
+        {
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblTrainEdit[j], &MyLabel::setHidden);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, txtTrainEdit[j], &MyLineEdit::setHidden);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lstStations, &MyTreeWidget::setHidden);
+        }
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblCheckOperation, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblStationsInfo, &MyLabel::setHidden);
+    }
+
+    for(int i = 0; i < 4; i = i + 1)
+    {
+        if(i == 2)
+        {
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblAddStationInstuct, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDel, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, txtDel, &MyLineEdit::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSearchDel, &MyPushButton::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnAdd, &MyPushButton::show);
+            for(int j = 0; j < 10; j = j + 1)
+            {
+                QObject::connect(btnMenu[i], &MyPushButton::clicked, lblNew[j], &MyLabel::show);
+                QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDelInfo[j], &MyLabel::show);
+                QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDelInfoText[j], &MyLabel::show);
+                QObject::connect(btnMenu[i], &MyPushButton::clicked, txtNew[j], &MyLineEdit::show);
+            }
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lneNewAndDel, &MyFrame::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDelCaution, &MyLabel::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, btnDel, &MyPushButton::show);
+            continue;
+        }
+
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblAddStationInstuct, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDel, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, txtDel, &MyLineEdit::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnSearchDel, &MyPushButton::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnAdd, &MyPushButton::setHidden);
+        for(int j = 0; j < 10; j = j + 1)
+        {
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblNew[j], &MyLabel::setHidden);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDelInfo[j], &MyLabel::setHidden);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDelInfoText[j], &MyLabel::setHidden);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, txtNew[j], &MyLineEdit::setHidden);
+        }
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lneNewAndDel, &MyFrame::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblDelCaution, &MyLabel::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, btnDel, &MyPushButton::setHidden);
+    }
+
+    for(int i = 0; i < 4; i = i + 1)
+    {
+        if(i == 3)
+        {
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lstHelp, &MyTreeWidget::show);
+            QObject::connect(btnMenu[i], &MyPushButton::clicked, lblContact, &MyLabel::show);
+            continue;
+        }
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lstHelp, &MyTreeWidget::setHidden);
+        QObject::connect(btnMenu[i], &MyPushButton::clicked, lblContact, &MyLabel::setHidden);
+    }
+
+    btnMenu[0]->click();
+    return a.exec();
+}
+#include "main.moc"

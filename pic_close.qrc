@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/new/close">
+        <file>exit0.jpg</file>
+        <file>exit1.jpg</file>
+    </qresource>
+</RCC>

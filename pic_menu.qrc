@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/new/menu">
+        <file>btnLeft0.jpg</file>
+        <file>btnLeft1.jpg</file>
+    </qresource>
+</RCC>

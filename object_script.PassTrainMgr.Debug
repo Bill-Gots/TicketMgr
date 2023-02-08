@@ -1,0 +1,14 @@
+INPUT(
+./debug\main.o
+./debug\widget.o
+./debug\qrc_pic_head.o
+./debug\qrc_pic_close.o
+./debug\qrc_icon.o
+./debug\qrc_pic_menu.o
+./debug\qrc_pic_search.o
+./debug\qrc_pic_back.o
+./debug\qrc_pic_save.o
+./debug\qrc_pic_left.o
+./debug\qrc_pic_addanddel.o
+./debug\moc_widget.o
+);

@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/new/add">
+        <file>btnAdd.png</file>
+    </qresource>
+    <qresource prefix="/new/del">
+        <file>btnDel.png</file>
+    </qresource>
+</RCC>

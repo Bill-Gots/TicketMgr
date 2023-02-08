@@ -1,0 +1,14 @@
+INPUT(
+./release\main.o
+./release\widget.o
+./release\qrc_pic_head.o
+./release\qrc_pic_close.o
+./release\qrc_icon.o
+./release\qrc_pic_menu.o
+./release\qrc_pic_search.o
+./release\qrc_pic_back.o
+./release\qrc_pic_save.o
+./release\qrc_pic_left.o
+./release\qrc_pic_addanddel.o
+./release\moc_widget.o
+);
