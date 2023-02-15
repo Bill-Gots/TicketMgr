@@ -8,6 +8,7 @@ public:
     QString no, departure, destination;
     int day, price;
     QTime time_leave, time_arrive;
+    Ticket *next;
 };
 
 class Order:public Ticket
@@ -17,6 +18,7 @@ public:
     QDate day_leave;
     QDateTime time;
     int num;
+    Order *next;
 };
 
 class Customer
@@ -25,4 +27,5 @@ public:
     QString name, id, username, password, telephone;
     int discount_type;
     Order* orders;
+    Customer *next;
 };
