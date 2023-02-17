@@ -2,20 +2,37 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class Widget; }
+namespace Ui { class main_widget; class login_widget;}
 QT_END_NAMESPACE
 
-class Widget : public QWidget
+class main_widget: public QWidget
 {
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = nullptr);
-    ~Widget();
+    QAbstractButton* button_confirm_exit;
+
+    main_widget(QWidget *parent = nullptr);
+    ~main_widget();
+
+public slots:
+    void confirm_exit(QAbstractButton* clicked_button);
 
 private:
-    Ui::Widget *ui;
+    Ui::main_widget *ui;
 };
+
+class login_widget: public QWidget
+{
+    Q_OBJECT
+
+public:
+    login_widget(QWidget *parent = nullptr);
+    ~login_widget();
+
+};
+
 #endif // WIDGET_H

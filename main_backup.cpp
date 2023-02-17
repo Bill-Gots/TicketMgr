@@ -66,34 +66,7 @@ public:
 public slots:
     void confirmExit(QAbstractButton* clickedBtn)
     {
-        if(clickedBtn == (QAbstractButton*) agree)
-        {
-            train* p = list;
-            std::ofstream outfile("data.txt", std::ios::trunc);
-            outfile << *total << std::endl;
-            while(p->next != NULL)
-            {
-                p = p->next;
-                outfile << p->No << '\t' << p->departure << '\t' << p->destination
-                    << '\t' << p->LeaveTime.hour() << '\t' << p->LeaveTime.minute()
-                    << '\t' << p->ArriveTime.hour() << '\t' << p->ArriveTime.minute()
-                    << '\t' << p->numOfPasses
-                    << '\t' << p->priceSit << '\t' << p->priceSleep
-                    << '\t' << p->days << '\t' << p->distance << std::endl;
-                passStation* q = p->passStations;
-                while (q->next != NULL)
-                {
-                    q = q->next;
-                    outfile << q->no << '\t' << q->station
-                        << '\t' << q->arriveTime.hour() << '\t' << q->arriveTime.minute()
-                        << '\t' << q->leaveTime.hour() << '\t' << q->leaveTime.minute()
-                        << '\t' << q->day << '\t' << q->kilometers << std::endl;
-                }
-            }
-            outfile.close();
-
-            this->close();
-        }
+        this->close();
     }
 
     void showEditWindow(int id)
@@ -1786,7 +1759,7 @@ void loadHelp(MyTreeWidget* lstHelp)
     infile.close();
 }
 
-int main(int argc, char *argv[])
+int old_main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MyWidget w;
@@ -2558,4 +2531,3 @@ int main(int argc, char *argv[])
     btnMenu[0]->click();
     return a.exec();
 }
-#include "main.moc"

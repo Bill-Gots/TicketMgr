@@ -16,23 +16,31 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        label.cpp \
+        line_edit.cpp \
         main.cpp \
-        main_backup.cpp \
+        push_button.cpp \
+        tree_widget.cpp \
         utils.cpp \
         widget.cpp
 
 HEADERS += \
-        MyWidget.h \
         dt.h \
+        label.h \
+        line_edit.h \
+        push_button.h \
+        tree_widget.h \
+        utils.h \
         widget.h
 
 FORMS += \
-        widget.ui
+    main_widget.ui
 
 RESOURCES += \
     pic_head.qrc \
     pic_close.qrc \
     icon.qrc \
+    pic_login_title.qrc \
     pic_menu.qrc \
     pic_search.qrc \
     pic_back.qrc \
@@ -43,7 +51,7 @@ RESOURCES += \
 TRANSLATIONS += \
     TicketMgr_zh_CN.ts
 
-RC_ICONS += PTM.ico
+RC_ICONS += TicketMgr.ico
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

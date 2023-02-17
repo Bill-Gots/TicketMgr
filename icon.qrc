@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/ico">
-        <file>PTM.ico</file>
+        <file>TicketMgr.ico</file>
     </qresource>
 </RCC>
