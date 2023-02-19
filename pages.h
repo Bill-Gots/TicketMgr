@@ -24,7 +24,7 @@ public:
 
     void create_page();
     void func_switch_search_type();
-    void load_data(Customer* head);
+    void create_list_widget(Customer* head);
     void func_open_window_add_and_edit_user();
 
 public slots:

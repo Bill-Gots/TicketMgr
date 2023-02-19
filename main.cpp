@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     user_info->load_progress_bar = load_progress_bar;
     user_info->create_page();
     user_info->func_switch_search_type();
-    //user_info->load_data(head_customer);
+    //user_info->create_list_widget(head_customer);
     user_info->func_open_window_add_and_edit_user();
 
 
