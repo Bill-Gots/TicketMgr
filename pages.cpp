@@ -14,8 +14,8 @@ void page_user::create_page()
     button_add_user = create_button_add_user(w);
     button_edit_user = create_button_edit_user(w);
     button_del_user = create_button_del_user(w);
-    window_add_user = create_window_add_user();
-    window_edit_user = create_window_edit_user();
+    window_add_user = create_window_add_user(list_user);
+    window_edit_user = create_window_edit_user(list_user);
     label_total_user = create_label_total_user(w);
 }
 
@@ -59,6 +59,12 @@ void page_user::func_switch_search_type()
     button_search_user->search_type_group = button_switch_search_user->search_type_group;
     QObject::connect(button_switch_search_user->search_type_group, QActionGroup::triggered, button_search_user, push_button_search_user::change_text);
     action_search[0]->trigger();
+}
+
+void page_user::func_open_window_add_and_edit_user()
+{
+    QObject::connect(button_add_user, push_button_add_user::clicked, window_add_user, widget_add_user::show);
+    QObject::connect(button_edit_user, push_button_edit_user::clicked, window_edit_user, widget_edit_user::show);
 }
 
 void page_user::show()

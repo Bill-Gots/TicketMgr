@@ -26,6 +26,8 @@ void func_exit_window(main_widget* w, QMessageBox* box_exit);
 void func_show_exit_box(QPushButton* button_exit, QMessageBox* box_exit);
 template <typename T>
 int count_total(T head);
+template <typename T>
+void destroy_list(T head);
 QProgressBar* create_load_progress_bar(main_widget* w, int total);
 QButtonGroup* create_menu(main_widget* w);
 label_system_time* create_label_systime(main_widget* w);
@@ -38,8 +40,8 @@ push_button_back* create_button_back(main_widget* w);
 push_button_add_user* create_button_add_user(main_widget* w);
 push_button_edit_user* create_button_edit_user(main_widget* w);
 push_button_del_user* create_button_del_user(main_widget* w);
-widget_operate_user* create_window_add_user();
-widget_edit_user* create_window_edit_user();
+widget_add_user* create_window_add_user(tree_widget_user* list_user);
+widget_edit_user* create_window_edit_user(tree_widget_user* list_user);
 label_total* create_label_total_user(main_widget* w);
 
 #endif // UTILS_H

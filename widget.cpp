@@ -29,12 +29,12 @@ login_widget::~login_widget()
 
 }
 
-widget_operate_user::widget_operate_user(QWidget *parent): QWidget(parent)
+widget_add_user::widget_add_user(QWidget *parent): QWidget(parent)
 {
 
 }
 
-widget_operate_user::~widget_operate_user()
+widget_add_user::~widget_add_user()
 {
 
 }

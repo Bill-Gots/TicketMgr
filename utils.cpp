@@ -174,6 +174,19 @@ int count_total(T head)
     return total;
 }
 
+template <typename T>
+int destory_list(T head)
+{
+    T t1 = head, t2;
+    while(t1->next != NULL)
+    {
+        t2 = t1;
+        t1 = t1->next;
+        delete t2;
+    }
+    delete t1;
+}
+
 QProgressBar* create_load_progress_bar(main_widget* w, int total)
 {
     QProgressBar* load_progress_bar = new QProgressBar(w);
@@ -182,7 +195,6 @@ QProgressBar* create_load_progress_bar(main_widget* w, int total)
     load_progress_bar->setMinimum(0);
     load_progress_bar->setMaximum(total);
     load_progress_bar->setValue(0);
-    double progress = double(load_progress_bar->value() - load_progress_bar->minimum()) * 100 / (load_progress_bar->maximum() - load_progress_bar->minimum());
     load_progress_bar->setFormat("数据库信息加载中……" + QString::number(0, 'f', 1) + "%");
     load_progress_bar->setFont(QFont("Microsoft YaHei UI", 16));
     load_progress_bar->setStyleSheet("QProgressBar{background:white; color:black;} QProgressBar::chunk{background:#327bff}");
@@ -208,7 +220,7 @@ QButtonGroup* create_menu(main_widget* w)
         button_menu[i]->setFont(QFont("Microsoft YaHei UI", 18));
         button_menu[i]->setCheckable(true);
         button_menu[i]->setStyleSheet("QPushButton:!pressed{border-image:url(:/new/menu/btnLeft0.jpg)} "
-                                  "QPushButton:hover, QPushButton:checked{border-image:url(:/new/menu/btnLeft1.jpg); color:white}");
+                                    "QPushButton:hover, QPushButton:checked{border-image:url(:/new/menu/btnLeft1.jpg); color:white}");
         button_menu[i]->show();
     }
     return menu;
@@ -324,25 +336,102 @@ push_button_del_user* create_button_del_user(main_widget* w)
     return button_del_user;
 }
 
-widget_operate_user* create_window_add_user()
+widget_add_user* create_window_add_user(tree_widget_user* list_user)
 {
-    widget_operate_user* window_add_user = new widget_operate_user();
+    widget_add_user* window_add_user = new widget_add_user();
+    window_add_user->setFixedSize(810, 290);
     window_add_user->setWindowTitle("添加用户信息");
     window_add_user->setPalette(QPalette(Qt::white));
     window_add_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
     window_add_user->setWindowModality(Qt::ApplicationModal);
 
+    QLabel* labels[6];
+    line_edit_add* texts[6];
+    for(int i = 0; i < 6; i++)
+    {
+        labels[i] = new QLabel(window_add_user);
+        labels[i]->resize(140, 45);
+        labels[i]->move(10 + 400 * (i % 2), 30 + 60 * (i / 2));
+        labels[i]->setText(list_user->headerItem()->text(i) + "：");
+        labels[i]->setFont(QFont("Microsoft YaHei UI", 14));
+        labels[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        texts[i] = new line_edit_add("", window_add_user);
+        texts[i]->resize(230, 45);
+        texts[i]->move(labels[i]->x() + labels[i]->width(), labels[i]->y());
+        texts[i]->setFont(QFont("Microsoft YaHei UI", 12));
+        texts[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        texts[i]->setMaxLength(30);
+        texts[i]->show();
+    }
+    window_add_user->labels_input = labels;
+    window_add_user->texts_input = texts;
+
+    QPushButton* button_confirm_add = new QPushButton(window_add_user);
+    button_confirm_add->resize(120, 50);
+    button_confirm_add->move(470, 220);
+    button_confirm_add->setText("确认");
+    button_confirm_add->setFont(QFont("Microsoft YaHei UI", 16));
+
+    QPushButton* button_cancel_add = new QPushButton(window_add_user);
+    button_cancel_add->resize(120, 50);
+    button_cancel_add->move(630, 220);
+    button_cancel_add->setText("取消");
+    button_cancel_add->setFont(QFont("Microsoft YaHei UI", 16));
+
+    QObject::connect(button_cancel_add, QPushButton::clicked, window_add_user, widget_add_user::close);
+
+    window_add_user->setAttribute(Qt::WA_QuitOnClose, false);
 
     return window_add_user;
 }
 
-widget_edit_user* create_window_edit_user()
+widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
 {
     widget_edit_user* window_edit_user = new widget_edit_user();
     window_edit_user->setWindowTitle("编辑用户信息");
     window_edit_user->setPalette(QPalette(Qt::white));
     window_edit_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
     window_edit_user->setWindowModality(Qt::ApplicationModal);
+
+    QLabel* labels[6];
+    line_edit_edit* texts[6];
+    for(int i = 0; i < 6; i++)
+    {
+        labels[i] = new QLabel(window_edit_user);
+        labels[i]->resize(140, 45);
+        labels[i]->move(10 + 400 * (i % 2), 30 + 60 * (i / 2));
+        labels[i]->setText(list_user->headerItem()->text(i) + "：");
+        labels[i]->setFont(QFont("Microsoft YaHei UI", 14));
+        labels[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        texts[i] = new line_edit_edit("", window_edit_user);
+        texts[i]->resize(230, 45);
+        texts[i]->move(labels[i]->x() + labels[i]->width(), labels[i]->y());
+        texts[i]->setFont(QFont("Microsoft YaHei UI", 12));
+        texts[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        texts[i]->setMaxLength(30);
+        texts[i]->show();
+    }
+    window_edit_user->labels_input = labels;
+    window_edit_user->texts_input = texts;
+
+    QPushButton* button_confirm_edit = new QPushButton(window_edit_user);
+    button_confirm_edit->resize(120, 50);
+    button_confirm_edit->move(470, 220);
+    button_confirm_edit->setText("确认");
+    button_confirm_edit->setFont(QFont("Microsoft YaHei UI", 16));
+
+    QPushButton* button_cancel_edit = new QPushButton(window_edit_user);
+    button_cancel_edit->resize(120, 50);
+    button_cancel_edit->move(630, 220);
+    button_cancel_edit->setText("取消");
+    button_cancel_edit->setFont(QFont("Microsoft YaHei UI", 16));
+
+    QObject::connect(button_cancel_edit, QPushButton::clicked, window_edit_user, widget_edit_user::close);
+
+    window_edit_user->setAttribute(Qt::WA_QuitOnClose, false);
+
     return window_edit_user;
 }
 

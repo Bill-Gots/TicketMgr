@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QLabel>
+#include "line_edit.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class main_widget; class login_widget;}
@@ -35,13 +37,16 @@ public:
 
 };
 
-class widget_operate_user: public QWidget
+class widget_add_user: public QWidget
 {
     Q_OBJECT
 
 public:
-    widget_operate_user(QWidget *parent = nullptr);
-    ~widget_operate_user();
+    QLabel** labels_input;
+    line_edit_add** texts_input;
+
+    widget_add_user(QWidget *parent = nullptr);
+    ~widget_add_user();
 
 };
 
@@ -50,6 +55,9 @@ class widget_edit_user: public QWidget
     Q_OBJECT
 
 public:
+    QLabel** labels_input;
+    line_edit_edit** texts_input;
+
     widget_edit_user(QWidget *parent = nullptr);
     ~widget_edit_user();
 
