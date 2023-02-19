@@ -61,9 +61,16 @@ int main(int argc, char *argv[])
     int total = 3000;
     QProgressBar* load_progress_bar = create_load_progress_bar(w, total);
 
-    create_menu(w);
+    QButtonGroup* menu = create_menu(w);
 
     create_label_systime(w);
+
+    page_user* user_info = new page_user;
+    user_info->w = w;
+    user_info->create_page();
+
+
+
 
 
 

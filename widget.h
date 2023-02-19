@@ -35,4 +35,24 @@ public:
 
 };
 
+class widget_add_user: public QWidget
+{
+    Q_OBJECT
+
+public:
+    widget_add_user(QWidget *parent = nullptr);
+    ~widget_add_user();
+
+};
+
+class widget_edit_user: public QWidget
+{
+    Q_OBJECT
+
+public:
+    widget_edit_user(QWidget *parent = nullptr);
+    ~widget_edit_user();
+
+};
+
 #endif // WIDGET_H

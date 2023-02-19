@@ -28,3 +28,25 @@ login_widget::~login_widget()
 {
 
 }
+
+widget_add_user::widget_add_user(QWidget *parent): QWidget(parent)
+{
+
+}
+
+widget_add_user::~widget_add_user()
+{
+
+}
+
+widget_edit_user::widget_edit_user(QWidget *parent): QWidget(parent)
+{
+
+}
+
+widget_edit_user::~widget_edit_user()
+{
+
+}
+
+

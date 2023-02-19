@@ -161,6 +161,11 @@ void func_show_exit_box(QPushButton* button_exit, QMessageBox* box_exit)
     QObject::connect(button_exit, &QPushButton::clicked, box_exit, &QMessageBox::show);
 }
 
+void load_data()
+{
+
+}
+
 QProgressBar* create_load_progress_bar(main_widget* w, int total)
 {
     QProgressBar* load_progress_bar = new QProgressBar(w);
@@ -170,7 +175,7 @@ QProgressBar* create_load_progress_bar(main_widget* w, int total)
     load_progress_bar->setMaximum(total);
     load_progress_bar->setValue(0);
     double progress = double(load_progress_bar->value() - load_progress_bar->minimum()) * 100 / (load_progress_bar->maximum() - load_progress_bar->minimum());
-    load_progress_bar->setFormat("数据库信息加载中……" + QString::number(progress, 'f', 1) + "%");
+    load_progress_bar->setFormat("数据库信息加载中……" + QString::number(0, 'f', 1) + "%");
     load_progress_bar->setFont(QFont("Microsoft YaHei UI", 16));
     load_progress_bar->setStyleSheet("QProgressBar{background:white; color:black;} QProgressBar::chunk{background:#327bff}");
     load_progress_bar->setAlignment(Qt::AlignCenter);
@@ -178,26 +183,27 @@ QProgressBar* create_load_progress_bar(main_widget* w, int total)
     return load_progress_bar;
 }
 
-const QString mnuText[5] = {"用户信息管理", "车票信息管理", "订单信息管理", "统计信息", "使用帮助"};
+const QString mnuText[4] = {"用户信息管理", "车票信息管理", "订单信息管理", "使用帮助"};
 
-void create_menu(main_widget* w)
+QButtonGroup* create_menu(main_widget* w)
 {
-    QPushButton* btnMenu[5];
-    QButtonGroup* mnu = new QButtonGroup;
-    mnu->setExclusive(true);
-    for(int i = 0; i < 5; i = i + 1)
+    QPushButton* button_menu[4];
+    QButtonGroup* menu = new QButtonGroup;
+    menu->setExclusive(true);
+    for(int i = 0; i < 4; i = i + 1)
     {
-        btnMenu[i] = new QPushButton(mnuText[i], w);
-        mnu->addButton(btnMenu[i], i);
-        btnMenu[i]->resize(350, 110);
-        btnMenu[i]->move(0, 188 + i * 110);
-        btnMenu[i]->setFlat(true);
-        btnMenu[i]->setFont(QFont("Microsoft YaHei UI", 18));
-        btnMenu[i]->setCheckable(true);
-        btnMenu[i]->setStyleSheet("QPushButton:!pressed{border-image:url(:/new/menu/btnLeft0.jpg)} "
+        button_menu[i] = new QPushButton(mnuText[i], w);
+        menu->addButton(button_menu[i], i);
+        button_menu[i]->resize(350, 110);
+        button_menu[i]->move(0, 188 + i * 110);
+        button_menu[i]->setFlat(true);
+        button_menu[i]->setFont(QFont("Microsoft YaHei UI", 18));
+        button_menu[i]->setCheckable(true);
+        button_menu[i]->setStyleSheet("QPushButton:!pressed{border-image:url(:/new/menu/btnLeft0.jpg)} "
                                   "QPushButton:hover, QPushButton:checked{border-image:url(:/new/menu/btnLeft1.jpg); color:white}");
-        btnMenu[i]->show();
+        button_menu[i]->show();
     }
+    return menu;
 }
 
 label_system_time* create_label_systime(main_widget* w)
@@ -214,4 +220,125 @@ label_system_time* create_label_systime(main_widget* w)
     return label_systime;
 }
 
+tree_widget_user* create_widget_user(main_widget* w)
+{
+    QStringList header_user;
+    header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型" << "订单信息";
+    tree_widget_user* list_user = new tree_widget_user(w);
+    list_user->resize(1567, 680);
+    list_user->move(353, 298);
+    list_user->setColumnCount(7);
+    list_user->setHeaderLabels(header_user);
+    list_user->setFont(QFont("Microsoft YaHei UI", 14));
+    list_user->setUniformRowHeights(false);
+    return list_user;
+}
 
+const QString instruct_search = "在输入框内输入待查询的内容，点击查询按钮即可查询信息。依次单击表头可以设置内容的升序和降序排列。 点击下拉菜单可以更改查询信息的类别。";
+
+QLabel* create_label_instruct_search(main_widget* w)
+{
+    QLabel* label_instruct_search = new QLabel(instruct_search, w);
+    label_instruct_search->resize(725, 100);
+    label_instruct_search->move(520, 195);
+    label_instruct_search->setText(instruct_search);
+    label_instruct_search->setFont(QFont("Microsoft YaHei UI", 12));
+    label_instruct_search->setWordWrap(true);
+    return label_instruct_search;
+}
+
+line_edit_search* create_text_search(main_widget* w)
+{
+    line_edit_search* text_search = new line_edit_search("", w);
+    text_search->resize(440, 60);
+    text_search->move(1260, 215);
+    text_search->setFont(QFont("Microsoft YaHei UI", 16));
+    text_search->setClearButtonEnabled(true);
+    text_search->setMaxLength(40);
+    return text_search;
+}
+
+push_button_search_user* create_button_search_user(main_widget* w)
+{
+    push_button_search_user* button_search_user = new push_button_search_user("搜索", w);
+    button_search_user->resize(170, 60);
+    button_search_user->move(1710, 215);
+    button_search_user->setIcon(QIcon(":/new/search/btnSearch.png"));
+    button_search_user->setIconSize(QSize(25, 25));
+    button_search_user->setFont(QFont("Microsoft YaHei UI", 12));
+    return button_search_user;
+}
+
+push_button_switch_search_user* create_button_switch_search_user(main_widget* w)
+{
+    push_button_switch_search_user* button_switch_search_user = new push_button_switch_search_user(w);
+    button_switch_search_user->resize(20, 60);
+    button_switch_search_user->move(1880, 215);
+    return button_switch_search_user;
+}
+
+push_button_back* create_button_back(main_widget* w)
+{
+    push_button_back* button_back_user = new push_button_back("返回", w);
+    button_back_user->resize(120, 60);
+    button_back_user->move(375, 215);
+    button_back_user->setFont(QFont("Microsoft YaHei UI", 14));
+    button_back_user->setIcon(QIcon(":/new/back/btnBack.png"));
+    button_back_user->setIconSize(QSize(20, 20));
+    button_back_user->setDisabled(true);
+    return button_back_user;
+}
+
+
+const QFont font_button_bottom("Microsoft YaHei UI", 12);
+push_button_add_user* create_button_add_user(main_widget* w)
+{
+    push_button_add_user* button_add_user = new push_button_add_user("添加用户信息", w);
+    button_add_user->resize(150, 40);
+    button_add_user->move(375, 985);
+    button_add_user->setFont(font_button_bottom);
+    return button_add_user;
+}
+push_button_edit_user* create_button_edit_user(main_widget* w)
+{
+    push_button_edit_user* button_edit_user = new push_button_edit_user("编辑用户信息", w);
+    button_edit_user->resize(150, 40);
+    button_edit_user->move(540, 985);
+    button_edit_user->setFont(font_button_bottom);
+    return button_edit_user;
+}
+
+push_button_del_user* create_button_del_user(main_widget* w)
+{
+    push_button_del_user* button_del_user = new push_button_del_user("删除用户信息", w);
+    button_del_user->resize(150, 40);
+    button_del_user->move(705, 985);
+    button_del_user->setFont(font_button_bottom);
+    return button_del_user;
+}
+
+widget_add_user* create_window_add_user()
+{
+    widget_add_user* window_add_user = new widget_add_user();
+    window_add_user->setWindowTitle("添加用户信息");
+    window_add_user->setPalette(QPalette(Qt::white));
+    window_add_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    window_add_user->setWindowModality(Qt::ApplicationModal);
+    return window_add_user;
+}
+
+widget_edit_user* create_window_edit_user()
+{
+    widget_edit_user* window_edit_user = new widget_edit_user();
+    window_edit_user->setWindowTitle("编辑用户信息");
+    window_edit_user->setPalette(QPalette(Qt::white));
+    window_edit_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    window_edit_user->setWindowModality(Qt::ApplicationModal);
+    return window_edit_user;
+}
+
+QLabel* create_label_total_user(main_widget* w)
+{
+    QLabel* label_total_user = new QLabel("现有用户信息总数：", w);
+    return label_total_user;
+}

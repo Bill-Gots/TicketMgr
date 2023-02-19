@@ -23,6 +23,94 @@ public slots:
     void login();
 };
 
+class push_button_search_user: public QPushButton
+{
+    Q_OBJECT
 
+signals:
+
+public:
+
+    push_button_search_user(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+
+};
+
+class push_button_switch_search_user: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_switch_search_user(QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+
+};
+
+class push_button_add_user: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_add_user(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+
+};
+
+class push_button_edit_user: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_edit_user(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+
+};
+
+class push_button_del_user: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_del_user(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+
+};
+
+class push_button_back: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_back(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+
+};
 
 #endif // PUSH_BUTTON_H

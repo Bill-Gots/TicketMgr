@@ -19,6 +19,7 @@ SOURCES += \
         label.cpp \
         line_edit.cpp \
         main.cpp \
+        pages.cpp \
         push_button.cpp \
         tree_widget.cpp \
         utils.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
         dt.h \
         label.h \
         line_edit.h \
+        pages.h \
         push_button.h \
         tree_widget.h \
         utils.h \
