@@ -25,7 +25,7 @@ void func_show_exit_box(QPushButton* button_exit, QMessageBox* box_exit);
 QProgressBar* create_load_progress_bar(main_widget* w, int total);
 QButtonGroup* create_menu(main_widget* w);
 label_system_time* create_label_systime(main_widget* w);
-tree_widget_user* create_widget_user(main_widget* w);
+tree_widget_user* create_tree_widget_user(main_widget* w);
 QLabel* create_label_instruct_search(main_widget* w);
 line_edit_search* create_text_search(main_widget* w);
 push_button_search_user* create_button_search_user(main_widget* w);

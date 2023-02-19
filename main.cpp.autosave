@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     user_info->w = w;
     user_info->load_progress_bar = load_progress_bar;
     user_info->create_page();
+    //user_info->load_data(head);
 
 
 

@@ -18,15 +18,15 @@ void page_user::create_page()
 
 void page_user::load_data(Customer* head)
 {
-    int total = 0;
     Customer* t = head;
     QStringList data;
     while(t->next != NULL)
     {
-        total += 1;
         t = t->next;
         data << t->name << t->id << t->username << t->password << t->telephone << QString::number(t->discount_type) << "";
         QTreeWidgetItem* new_item = new QTreeWidgetItem(list_user, data);
+        list_user->addTopLevelItem(new_item);
+        data.clear();
 
 
     }

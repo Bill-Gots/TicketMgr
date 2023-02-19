@@ -215,7 +215,7 @@ label_system_time* create_label_systime(main_widget* w)
     return label_systime;
 }
 
-tree_widget_user* create_widget_user(main_widget* w)
+tree_widget_user* create_tree_widget_user(main_widget* w)
 {
     QStringList header_user;
     header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型" << "订单信息";

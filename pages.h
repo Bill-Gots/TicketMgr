@@ -7,6 +7,7 @@ class page_user
 {
 public:
     main_widget* w;
+    QProgressBar* load_progress_bar;
     tree_widget_user* list_user;
     QLabel* label_instruct_search;
     line_edit_search* text_search;
@@ -18,9 +19,11 @@ public:
     push_button_del_user* button_del_user;
     widget_add_user* window_add_user;
     widget_edit_user* window_edit_user;
-    QLabel* label_total_user;
+    label_total* label_total_user;
 
     void create_page();
+
+    void load_data(Customer* head);
 
 public slots:
     void show();

@@ -17,4 +17,20 @@ public slots:
     void update_time();
 };
 
+class label_total:public QLabel
+{
+public:
+    Q_OBJECT
+
+public:
+    int total = 0;
+    QString usage;
+
+    label_total(const QString text, const QString u, QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+    void update_total(int t);
+};
+
 #endif // LABEL_H
