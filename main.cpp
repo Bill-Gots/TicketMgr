@@ -1,5 +1,4 @@
 #include "widget.h"
-#include "dt.h"
 #include "utils.h"
 #include <QApplication>
 #include <fstream>
@@ -58,6 +57,15 @@ int main(int argc, char *argv[])
     func_exit_window(w, box_exit);
     func_show_exit_box(button_exit, box_exit);
 
+    Customer* head_customer;
+    Ticket* head_ticket;
+    Order* head_order;
+
+    //int total_user = count_total(head_customer);
+    //int total_ticket = count_total(head_ticket);
+    //int total_order = count_total(head_order);
+    //QProgressBar* load_progress_bar = create_load_progress_bar(w, total_user + total_ticket + total_user);
+
     int total = 3000;
     QProgressBar* load_progress_bar = create_load_progress_bar(w, total);
 
@@ -69,6 +77,8 @@ int main(int argc, char *argv[])
     user_info->w = w;
     user_info->load_progress_bar = load_progress_bar;
     user_info->create_page();
+    user_info->func_switch_search_type();
+    //user_info->load_data(head_customer);
 
 
 

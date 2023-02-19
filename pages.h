@@ -17,12 +17,12 @@ public:
     push_button_add_user* button_add_user;
     push_button_edit_user* button_edit_user;
     push_button_del_user* button_del_user;
-    widget_add_user* window_add_user;
+    widget_operate_user* window_add_user;
     widget_edit_user* window_edit_user;
     label_total* label_total_user;
 
     void create_page();
-
+    void func_switch_search_type();
     void load_data(Customer* head);
 
 public slots:

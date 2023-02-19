@@ -19,6 +19,11 @@ push_button_search_user::push_button_search_user(const QString text, QWidget* pa
 
 }
 
+void push_button_search_user::change_text()
+{
+    this->setText(search_type_group->checkedAction()->text());
+}
+
 push_button_switch_search_user::push_button_switch_search_user(QWidget* parent): QPushButton(parent)
 {
 

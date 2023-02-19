@@ -1,4 +1,7 @@
 #include <pages.h>
+#include <utils.h>
+
+const QString str_discount_type[4] = {"成人", "儿童","学生", "残军"};
 
 void page_user::create_page()
 {
@@ -18,18 +21,44 @@ void page_user::create_page()
 
 void page_user::load_data(Customer* head)
 {
-    int total = 0;
     Customer* t = head;
     QStringList data;
     while(t->next != NULL)
     {
-        total += 1;
         t = t->next;
-        data << t->name << t->id << t->username << t->password << t->telephone << QString::number(t->discount_type) << "";
+        data << t->name << t->id << t->username << t->password << t->telephone << str_discount_type[t->discount_type] << "";
         QTreeWidgetItem* new_item = new QTreeWidgetItem(list_user, data);
+        list_user->addTopLevelItem(new_item);
+        data.clear();
 
-
+        load_progress_bar->setValue(load_progress_bar->value() + 1);
+        double progress = double(load_progress_bar->value() - load_progress_bar->minimum()) * 100 / double(load_progress_bar->maximum() - load_progress_bar->minimum());
+        load_progress_bar->setFormat("车次信息加载中……" + QString::number(progress, 'f', 1) + "%");
     }
+}
+
+
+void page_user::func_switch_search_type()
+{
+    button_switch_search_user->search_type_group = new QActionGroup(button_switch_search_user);
+    button_switch_search_user->search_type_group->setExclusive(true);
+
+    QMenu* menu_search = new QMenu(button_search_user);
+    button_switch_search_user->menu = menu_search;
+    QAction* action_search[6];
+    for(int i = 0; i < 6; i = i + 1)
+    {
+        action_search[i] = new QAction(menu_search);
+        action_search[i]->setText(search_type_user[i]);
+        action_search[i]->setCheckable(true);
+        menu_search->addAction(action_search[i]);
+        button_switch_search_user->search_type_group->addAction(action_search[i]);
+    }
+    button_switch_search_user->setMenu(menu_search);
+
+    button_search_user->search_type_group = button_switch_search_user->search_type_group;
+    QObject::connect(button_switch_search_user->search_type_group, QActionGroup::triggered, button_search_user, push_button_search_user::change_text);
+    action_search[0]->trigger();
 }
 
 void page_user::show()

@@ -161,6 +161,19 @@ void func_show_exit_box(QPushButton* button_exit, QMessageBox* box_exit)
     QObject::connect(button_exit, &QPushButton::clicked, box_exit, &QMessageBox::show);
 }
 
+template <typename T>
+int count_total(T head)
+{
+    int total = 0;
+    T t = head;
+    while(t->next != NULL)
+    {
+        t = t->next;
+        total += 1;
+    }
+    return total;
+}
+
 QProgressBar* create_load_progress_bar(main_widget* w, int total)
 {
     QProgressBar* load_progress_bar = new QProgressBar(w);
@@ -215,7 +228,7 @@ label_system_time* create_label_systime(main_widget* w)
     return label_systime;
 }
 
-tree_widget_user* create_widget_user(main_widget* w)
+tree_widget_user* create_tree_widget_user(main_widget* w)
 {
     QStringList header_user;
     header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型" << "订单信息";
@@ -284,7 +297,6 @@ push_button_back* create_button_back(main_widget* w)
     return button_back_user;
 }
 
-
 const QFont font_button_bottom("Microsoft YaHei UI", 12);
 push_button_add_user* create_button_add_user(main_widget* w)
 {
@@ -312,13 +324,15 @@ push_button_del_user* create_button_del_user(main_widget* w)
     return button_del_user;
 }
 
-widget_add_user* create_window_add_user()
+widget_operate_user* create_window_add_user()
 {
-    widget_add_user* window_add_user = new widget_add_user();
+    widget_operate_user* window_add_user = new widget_operate_user();
     window_add_user->setWindowTitle("添加用户信息");
     window_add_user->setPalette(QPalette(Qt::white));
     window_add_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
     window_add_user->setWindowModality(Qt::ApplicationModal);
+
+
     return window_add_user;
 }
 

@@ -35,13 +35,13 @@ public:
 
 };
 
-class widget_add_user: public QWidget
+class widget_operate_user: public QWidget
 {
     Q_OBJECT
 
 public:
-    widget_add_user(QWidget *parent = nullptr);
-    ~widget_add_user();
+    widget_operate_user(QWidget *parent = nullptr);
+    ~widget_operate_user();
 
 };
 
