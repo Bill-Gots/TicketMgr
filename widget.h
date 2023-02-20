@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QLabel>
+#include <dt.h>
 #include "line_edit.h"
+#include "tree_widget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class main_widget; class login_widget;}
@@ -41,26 +43,44 @@ class widget_add_user: public QWidget
 {
     Q_OBJECT
 
+signals:
+    void empty_input();
+    void add_success();
+
 public:
+    tree_widget_user* list_user;
     QLabel** labels_input;
     line_edit_add** texts_input;
+    Customer* adding_user;
 
     widget_add_user(QWidget *parent = nullptr);
     ~widget_add_user();
+
+public slots:
+    void add_user();
+
 
 };
 
 class widget_edit_user: public QWidget
 {
     Q_OBJECT
+signals:
+    void empty_input();
+    void add_success();
 
 public:
+    tree_widget_user* list_user;
     QLabel** labels_input;
     line_edit_edit** texts_input;
+    Customer* adding_user;
 
     widget_edit_user(QWidget *parent = nullptr);
     ~widget_edit_user();
 
+public slots:
+    void show_info();
+    void edit_user();
 };
 
 #endif // WIDGET_H

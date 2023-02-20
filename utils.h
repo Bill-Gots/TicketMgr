@@ -9,7 +9,7 @@
 #include <QProgressBar>
 #include <QTimer>
 #include <QMenu>
-#include "dt.h"
+#include <QHeaderView>
 #include "widget.h"
 #include "label.h"
 #include "tree_widget.h"
@@ -31,6 +31,7 @@ void destroy_list(T head);
 QProgressBar* create_load_progress_bar(main_widget* w, int total);
 QButtonGroup* create_menu(main_widget* w);
 label_system_time* create_label_systime(main_widget* w);
+void func_set_alignment_and_width(QTreeWidget* list, QTreeWidgetItem* item);
 tree_widget_user* create_tree_widget_user(main_widget* w);
 QLabel* create_label_instruct_search(main_widget* w);
 line_edit_search* create_text_search(main_widget* w);
@@ -40,8 +41,9 @@ push_button_back* create_button_back(main_widget* w);
 push_button_add_user* create_button_add_user(main_widget* w);
 push_button_edit_user* create_button_edit_user(main_widget* w);
 push_button_del_user* create_button_del_user(main_widget* w);
-widget_add_user* create_window_add_user(tree_widget_user* list_user);
-widget_edit_user* create_window_edit_user(tree_widget_user* list_user);
 label_total* create_label_total_user(main_widget* w);
+widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total* total);
+widget_edit_user* create_window_edit_user(tree_widget_user* list_user);
+
 
 #endif // UTILS_H

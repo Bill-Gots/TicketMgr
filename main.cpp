@@ -1,23 +1,7 @@
 #include "widget.h"
 #include "utils.h"
 #include <QApplication>
-#include <fstream>
-#include <QTextStream>
-#include <QTimer>
-#include <QProgressBar>
-#include <QList>
-#include <QStringList>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
-#include <QMenu>
-#include <QLineEdit>
-#include <QToolButton>
-#include <QFrame>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QHeaderView>
-#include <QDebug>
-#include <QMessageBox>
+
 
 const QString mnuStyle = "QPushButton:!pressed{border-image:url(:/new/menu/btnLeft0.jpg)} "
                          "QPushButton:hover, QPushButton:checked{border-image:url(:/new/menu/btnLeft1.jpg); color:white}";

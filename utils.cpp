@@ -1,5 +1,4 @@
 #include "utils.h"
-#include "push_button.h"
 
 login_widget* load_login_window()
 {
@@ -59,6 +58,7 @@ void func_login_interface(login_widget* lw, main_widget* w)
     text_password->setFont(QFont("Microsoft YaHei UI", 12));
     text_password->setClearButtonEnabled(true);
     text_password->setMaxLength(20);
+    text_password->setEchoMode(QLineEdit::Password);
     text_password->show();
 
     QLabel* label_sql_name = new QLabel("数据库名：", lw);
@@ -175,7 +175,7 @@ int count_total(T head)
 }
 
 template <typename T>
-int destory_list(T head)
+void destory_list(T head)
 {
     T t1 = head, t2;
     while(t1->next != NULL)
@@ -203,14 +203,14 @@ QProgressBar* create_load_progress_bar(main_widget* w, int total)
     return load_progress_bar;
 }
 
-const QString mnuText[4] = {"用户信息管理", "车票信息管理", "订单信息管理", "使用帮助"};
+const QString mnuText[4] = {"用户信息管理", "车票信息管理", "订单信息管理"};
 
 QButtonGroup* create_menu(main_widget* w)
 {
     QPushButton* button_menu[4];
     QButtonGroup* menu = new QButtonGroup;
     menu->setExclusive(true);
-    for(int i = 0; i < 4; i = i + 1)
+    for(int i = 0; i < 3; i = i + 1)
     {
         button_menu[i] = new QPushButton(mnuText[i], w);
         menu->addButton(button_menu[i], i);
@@ -240,17 +240,28 @@ label_system_time* create_label_systime(main_widget* w)
     return label_systime;
 }
 
+void func_set_alignment_and_width(QTreeWidget* list, QTreeWidgetItem* item)
+{
+    for(int i = 0; i <= list->columnCount(); i = i + 1)
+    {
+        item->setTextAlignment(i, Qt::AlignCenter);
+        list->setColumnWidth(i, 215);
+    }
+}
+
 tree_widget_user* create_tree_widget_user(main_widget* w)
 {
     QStringList header_user;
-    header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型" << "订单信息";
+    header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型"<<"";
     tree_widget_user* list_user = new tree_widget_user(w);
     list_user->resize(1567, 680);
     list_user->move(353, 298);
     list_user->setColumnCount(7);
     list_user->setHeaderLabels(header_user);
     list_user->setFont(QFont("Microsoft YaHei UI", 14));
-    list_user->setUniformRowHeights(false);
+    list_user->setUniformRowHeights(false);\
+    list_user->header()->setDefaultAlignment(Qt::AlignCenter);
+    list_user->setSortingEnabled(true);
     return list_user;
 }
 
@@ -324,6 +335,7 @@ push_button_edit_user* create_button_edit_user(main_widget* w)
     button_edit_user->resize(150, 40);
     button_edit_user->move(560, 985);
     button_edit_user->setFont(font_button_bottom);
+    button_edit_user->set_disabled();
     return button_edit_user;
 }
 
@@ -333,10 +345,21 @@ push_button_del_user* create_button_del_user(main_widget* w)
     button_del_user->resize(150, 40);
     button_del_user->move(745, 985);
     button_del_user->setFont(font_button_bottom);
+    button_del_user->set_disabled();
     return button_del_user;
 }
 
-widget_add_user* create_window_add_user(tree_widget_user* list_user)
+label_total* create_label_total_user(main_widget* w)
+{
+    label_total* label_total_user = new label_total("现有用户信息总数：", "用户", w);
+    label_total_user->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    label_total_user->resize(350, 40);
+    label_total_user->move(1550, 985);
+    label_total_user->setFont(QFont("Microsoft YaHei UI", 13));
+    return label_total_user;
+}
+
+widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total* total)
 {
     widget_add_user* window_add_user = new widget_add_user();
     window_add_user->setFixedSize(810, 290);
@@ -344,9 +367,10 @@ widget_add_user* create_window_add_user(tree_widget_user* list_user)
     window_add_user->setPalette(QPalette(Qt::white));
     window_add_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
     window_add_user->setWindowModality(Qt::ApplicationModal);
+    window_add_user->list_user = list_user;
 
-    QLabel* labels[6];
-    line_edit_add* texts[6];
+    QLabel** labels = new QLabel*[6];
+    line_edit_add** texts = new line_edit_add*[6];
     for(int i = 0; i < 6; i++)
     {
         labels[i] = new QLabel(window_add_user);
@@ -362,16 +386,44 @@ widget_add_user* create_window_add_user(tree_widget_user* list_user)
         texts[i]->setFont(QFont("Microsoft YaHei UI", 12));
         texts[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         texts[i]->setMaxLength(30);
-        texts[i]->show();
     }
-    window_add_user->labels_input = labels;
-    window_add_user->texts_input = texts;
+    window_add_user->labels_input = (QLabel**) (labels);
+    window_add_user->texts_input = (line_edit_add**) (texts);
 
     QPushButton* button_confirm_add = new QPushButton(window_add_user);
     button_confirm_add->resize(120, 50);
     button_confirm_add->move(470, 220);
     button_confirm_add->setText("确认");
     button_confirm_add->setFont(QFont("Microsoft YaHei UI", 16));
+
+    QObject::connect(button_confirm_add, QPushButton::clicked, window_add_user, widget_add_user::add_user);
+
+    QMessageBox* box_empty_input = new QMessageBox();
+    box_empty_input->setWindowTitle("错误");
+    box_empty_input->setText("有字段为空，请重新输入。");
+    box_empty_input->addButton("确定", QMessageBox::AcceptRole);
+    box_empty_input->setFont(QFont("Microsoft YaHei UI", 10));
+    box_empty_input->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    box_empty_input->setIcon(QMessageBox::Critical);
+    box_empty_input->setWindowModality(Qt::ApplicationModal);
+
+    QObject::connect(window_add_user, widget_add_user::empty_input, box_empty_input, QMessageBox::show);
+
+    QMessageBox* box_add_success = new QMessageBox();
+    box_add_success->setWindowTitle("成功");
+    box_add_success->setText("添加新用户信息成功。");
+    box_add_success->addButton("确定", QMessageBox::AcceptRole);
+    box_add_success->setFont(QFont("Microsoft YaHei UI", 10));
+    box_add_success->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    box_add_success->setIcon(QMessageBox::Information);
+    box_add_success->setWindowModality(Qt::ApplicationModal);
+    QObject::connect(window_add_user, widget_add_user::add_success, box_add_success, QMessageBox::show);
+    QObject::connect(window_add_user, widget_add_user::add_success, window_add_user, widget_add_user::close);
+    QObject::connect(window_add_user, widget_add_user::add_success, total, label_total::add_total);
+    for(int i = 0; i < 6; i++)
+    {
+        QObject::connect(window_add_user, widget_add_user::add_success, texts[i], line_edit_add::clear);
+    }
 
     QPushButton* button_cancel_add = new QPushButton(window_add_user);
     button_cancel_add->resize(120, 50);
@@ -394,8 +446,8 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     window_edit_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
     window_edit_user->setWindowModality(Qt::ApplicationModal);
 
-    QLabel* labels[6];
-    line_edit_edit* texts[6];
+    QLabel** labels = new QLabel*[6];
+    line_edit_edit** texts = new line_edit_edit*[6];
     for(int i = 0; i < 6; i++)
     {
         labels[i] = new QLabel(window_edit_user);
@@ -422,6 +474,34 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     button_confirm_edit->setText("确认");
     button_confirm_edit->setFont(QFont("Microsoft YaHei UI", 16));
 
+    QObject::connect(button_confirm_edit, QPushButton::clicked, window_edit_user, widget_add_user::edit_user);
+
+    QMessageBox* box_empty_input = new QMessageBox();
+    box_empty_input->setWindowTitle("错误");
+    box_empty_input->setText("有字段为空，请重新输入。");
+    box_empty_input->addButton("确定", QMessageBox::AcceptRole);
+    box_empty_input->setFont(QFont("Microsoft YaHei UI", 10));
+    box_empty_input->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    box_empty_input->setIcon(QMessageBox::Critical);
+    box_empty_input->setWindowModality(Qt::ApplicationModal);
+
+    QObject::connect(window_edit_user, widget_edit_user::empty_input, box_empty_input, QMessageBox::show);
+
+    QMessageBox* box_edit_success = new QMessageBox();
+    box_edit_success->setWindowTitle("成功");
+    box_edit_success->setText("添加新用户信息成功。");
+    box_edit_success->addButton("确定", QMessageBox::AcceptRole);
+    box_edit_success->setFont(QFont("Microsoft YaHei UI", 10));
+    box_edit_success->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    box_edit_success->setIcon(QMessageBox::Information);
+    box_edit_success->setWindowModality(Qt::ApplicationModal);
+    QObject::connect(window_edit_user, widget_edit_user::edit_success, box_edit_success, QMessageBox::show);
+    QObject::connect(window_edit_user, widget_edit_user::edit_success, window_edit_user, widget_edit_user::close);
+    for(int i = 0; i < 6; i++)
+    {
+        QObject::connect(window_edit_user, widget_edit_user::edit_success, texts[i], line_edit_edit::clear);
+    }
+
     QPushButton* button_cancel_edit = new QPushButton(window_edit_user);
     button_cancel_edit->resize(120, 50);
     button_cancel_edit->move(630, 220);
@@ -435,13 +515,5 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     return window_edit_user;
 }
 
-label_total* create_label_total_user(main_widget* w)
-{
-    label_total* label_total_user = new label_total("现有用户信息总数：", "用户", w);
-    label_total_user->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    label_total_user->resize(350, 40);
-    label_total_user->move(1550, 985);
-    label_total_user->setFont(QFont("Microsoft YaHei UI", 13));
-    return label_total_user;
-}
+
 

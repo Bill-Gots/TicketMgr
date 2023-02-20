@@ -31,6 +31,7 @@ public:
 
 public slots:
     void update_total(int t);
+    void add_total();
 };
 
 #endif // LABEL_H

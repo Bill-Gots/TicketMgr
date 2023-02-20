@@ -69,6 +69,8 @@ public:
     push_button_add_user(const QString text = "", QWidget* parent = Q_NULLPTR);
 
 public slots:
+    void set_enabled();
+    void set_disabled();
 
 };
 
@@ -84,6 +86,8 @@ public:
 
 
 public slots:
+    void set_enabled();
+    void set_disabled();
 
 };
 
@@ -99,6 +103,8 @@ public:
 
 
 public slots:
+    void set_enabled();
+    void set_disabled();
 
 };
 

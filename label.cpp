@@ -19,3 +19,9 @@ void label_total::update_total(int t)
 {
     this->setText("现有" + usage + "信息总数：" + QString::number(t));
 }
+
+void label_total::add_total()
+{
+    total++;
+    this->setText("现有" + usage + "信息总数：" + QString::number(total));
+}

@@ -85,7 +85,7 @@ widget_edit_user::~widget_edit_user()
 
 }
 
-void show_info()
+void widget_edit_user::show_info()
 {
 
 }

@@ -1,5 +1,4 @@
 #include <pages.h>
-#include <utils.h>
 
 const QString str_discount_type[4] = {"成人", "儿童","学生", "残军"};
 
@@ -14,21 +13,24 @@ void page_user::create_page()
     button_add_user = create_button_add_user(w);
     button_edit_user = create_button_edit_user(w);
     button_del_user = create_button_del_user(w);
-    window_add_user = create_window_add_user(list_user);
-    window_edit_user = create_window_edit_user(list_user);
     label_total_user = create_label_total_user(w);
+    window_add_user = create_window_add_user(list_user,label_total_user);
+    window_edit_user = create_window_edit_user(list_user);
+    QObject::connect(list_user, tree_widget_user::itemClicked, button_edit_user, push_button_edit_user::set_enabled);
+    QObject::connect(list_user, tree_widget_user::itemClicked, button_del_user, push_button_del_user::set_enabled);
 }
 
-void page_user::load_data(Customer* head)
+void page_user::create_list_widget(Customer* head)
 {
     Customer* t = head;
     QStringList data;
     while(t->next != NULL)
     {
         t = t->next;
-        data << t->name << t->id << t->username << t->password << t->telephone << str_discount_type[t->discount_type] << "";
+        data << t->name << t->id << t->username << t->password << t->telephone << str_discount_type[t->discount_type];
         QTreeWidgetItem* new_item = new QTreeWidgetItem(list_user, data);
         list_user->addTopLevelItem(new_item);
+        func_set_alignment_and_width(list_user, new_item);
         data.clear();
 
         load_progress_bar->setValue(load_progress_bar->value() + 1);

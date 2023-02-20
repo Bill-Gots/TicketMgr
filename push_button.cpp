@@ -34,14 +34,44 @@ push_button_add_user::push_button_add_user(const QString text, QWidget* parent):
 
 }
 
+void push_button_add_user:: set_enabled()
+{
+    this->QPushButton::setEnabled(true);
+}
+
+void push_button_add_user:: set_disabled()
+{
+    this->QPushButton::setDisabled(true);
+}
+
 push_button_edit_user::push_button_edit_user(const QString text, QWidget* parent): QPushButton(text, parent)
 {
 
 }
 
+void push_button_edit_user:: set_enabled()
+{
+    this->QPushButton::setEnabled(true);
+}
+
+void push_button_edit_user:: set_disabled()
+{
+    this->QPushButton::setDisabled(true);
+}
+
 push_button_del_user::push_button_del_user(const QString text, QWidget* parent): QPushButton(text, parent)
 {
 
+}
+
+void push_button_del_user:: set_enabled()
+{
+    this->QPushButton::setEnabled(true);
+}
+
+void push_button_del_user:: set_disabled()
+{
+    this->QPushButton::setDisabled(true);
 }
 
 push_button_back::push_button_back(const QString text, QWidget* parent): QPushButton(text, parent)
