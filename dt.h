@@ -1,6 +1,6 @@
-#include <QTime>
+#ifndef DT_H
+#define DT_H
 #include <QDateTime>
-
 
 class Ticket
 {
@@ -14,7 +14,7 @@ public:
 class Order:public Ticket
 {
 public:
-    QString order, name, id;
+    QString no, name, id;
     QDate day_leave;
     QDateTime time;
     int num;
@@ -29,3 +29,5 @@ public:
     Order* orders;
     Customer *next;
 };
+
+#endif // DT_H

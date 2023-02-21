@@ -3,12 +3,9 @@
 
 
 #include <QMessageBox>
-#include <QPushButton>
-#include <QButtonGroup>
-#include <QLineEdit>
 #include <QProgressBar>
+#include <QButtonGroup>
 #include <QTimer>
-#include <QMenu>
 #include <QHeaderView>
 #include "widget.h"
 #include "label.h"
@@ -16,6 +13,7 @@
 #include "line_edit.h"
 #include "push_button.h"
 #include "pages.h"
+
 
 login_widget* load_login_window();
 main_widget* load_main_window();
@@ -25,25 +23,34 @@ QMessageBox* create_exit_box();
 void func_exit_window(main_widget* w, QMessageBox* box_exit);
 void func_show_exit_box(QPushButton* button_exit, QMessageBox* box_exit);
 template <typename T>
-int count_total(T head);
+int count_total(T head)
+{
+    int total = 0;
+    T t = head;
+    while(t->next != NULL)
+    {
+        t = t->next;
+        total += 1;
+    }
+    return total;
+}
 template <typename T>
-void destroy_list(T head);
+void destory_list(T head)
+{
+    T t1 = head, t2;
+    while(t1->next != NULL)
+    {
+        t2 = t1;
+        t1 = t1->next;
+        delete t2;
+    }
+    delete t1;
+}
 QProgressBar* create_load_progress_bar(main_widget* w, int total);
 QButtonGroup* create_menu(main_widget* w);
 label_system_time* create_label_systime(main_widget* w);
-void func_set_alignment_and_width(QTreeWidget* list, QTreeWidgetItem* item);
-tree_widget_user* create_tree_widget_user(main_widget* w);
-QLabel* create_label_instruct_search(main_widget* w);
-line_edit_search* create_text_search(main_widget* w);
-push_button_search_user* create_button_search_user(main_widget* w);
-push_button_switch_search_user* create_button_switch_search_user(main_widget* w);
-push_button_back* create_button_back(main_widget* w);
-push_button_add_user* create_button_add_user(main_widget* w);
-push_button_edit_user* create_button_edit_user(main_widget* w);
-push_button_del_user* create_button_del_user(main_widget* w);
-label_total* create_label_total_user(main_widget* w);
-widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total* total);
-widget_edit_user* create_window_edit_user(tree_widget_user* list_user);
 
+
+//void func_switch_pages(QButtonGroup* menu, page_user* user_info, page_ticket* ticket_info, page_order* order_info);
 
 #endif // UTILS_H

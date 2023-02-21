@@ -109,6 +109,169 @@ public slots:
 
 };
 
+const QString search_type_ticket[7] = {"查询车次", "查询始发站", "查询终点站", "查询始发时间", "查询终到时间", "查询天数", "查询票价"};
+class push_button_search_ticket: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    QActionGroup* search_type_group;
+    QAction** action_search;
+
+    push_button_search_ticket(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void change_text();
+
+};
+
+class push_button_switch_search_ticket: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    QActionGroup* search_type_group;
+    QMenu* menu;
+
+    push_button_switch_search_ticket(QWidget* parent = Q_NULLPTR);
+
+public slots:
+
+};
+
+class push_button_add_ticket: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_add_ticket(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void set_enabled();
+    void set_disabled();
+
+};
+
+class push_button_edit_ticket: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_edit_ticket(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+
+public slots:
+    void set_enabled();
+    void set_disabled();
+
+};
+
+class push_button_del_ticket: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+
+    push_button_del_ticket(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void set_enabled();
+    void set_disabled();
+
+};
+
+class push_button_search_order: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    QActionGroup* search_type_group;
+    QAction** action_search;
+
+    push_button_search_order(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void change_text();
+
+};
+
+class push_button_switch_search_order: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    QActionGroup* search_type_group;
+    QMenu* menu;
+
+    push_button_switch_search_order(QWidget* parent = Q_NULLPTR);
+
+public slots:
+
+};
+
+class push_button_add_order: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    push_button_add_order(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void set_enabled();
+    void set_disabled();
+
+};
+
+class push_button_edit_order: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    push_button_edit_order(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void set_enabled();
+    void set_disabled();
+
+};
+
+class push_button_del_order: public QPushButton
+{
+    Q_OBJECT
+
+signals:
+
+public:
+    push_button_del_order(const QString text = "", QWidget* parent = Q_NULLPTR);
+
+public slots:
+    void set_enabled();
+    void set_disabled();
+
+};
+
+
+
 class push_button_back: public QPushButton
 {
     Q_OBJECT

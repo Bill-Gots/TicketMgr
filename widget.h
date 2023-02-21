@@ -83,4 +83,93 @@ public slots:
     void edit_user();
 };
 
+class widget_add_ticket: public QWidget
+{
+    Q_OBJECT
+
+signals:
+    void empty_input();
+    void add_success();
+
+public:
+    tree_widget_ticket* list_ticket;
+    QLabel** labels_input;
+    line_edit_add** texts_input;
+    Customer* adding_ticket;
+
+    widget_add_ticket(QWidget *parent = nullptr);
+    ~widget_add_ticket();
+
+public slots:
+    void add_ticket();
+
+
+};
+
+class widget_edit_ticket: public QWidget
+{
+    Q_OBJECT
+signals:
+    void empty_input();
+    void edit_success();
+
+public:
+    tree_widget_ticket* list_ticket;
+    QLabel** labels_input;
+    line_edit_edit** texts_input;
+    Customer* adding_ticket;
+
+    widget_edit_ticket(QWidget *parent = nullptr);
+    ~widget_edit_ticket();
+
+public slots:
+    void show_info();
+    void edit_ticket();
+};
+
+class widget_add_order: public QWidget
+{
+    Q_OBJECT
+
+signals:
+    void empty_input();
+    void add_success();
+
+public:
+    tree_widget_order* list_order;
+    QLabel** labels_input;
+    line_edit_add** texts_input;
+    Customer* adding_order;
+
+    widget_add_order(QWidget *parent = nullptr);
+    ~widget_add_order();
+
+public slots:
+    void add_order();
+
+
+};
+
+class widget_edit_order: public QWidget
+{
+    Q_OBJECT
+signals:
+    void empty_input();
+    void edit_success();
+
+public:
+    tree_widget_order* list_order;
+    QLabel** labels_input;
+    line_edit_edit** texts_input;
+    Customer* adding_order;
+
+    widget_edit_order(QWidget *parent = nullptr);
+    ~widget_edit_order();
+
+public slots:
+    void show_info();
+    void edit_order();
+};
+
+
 #endif // WIDGET_H
