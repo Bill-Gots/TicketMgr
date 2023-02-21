@@ -252,7 +252,7 @@ void func_set_alignment_and_width(QTreeWidget* list, QTreeWidgetItem* item)
 tree_widget_user* create_tree_widget_user(main_widget* w)
 {
     QStringList header_user;
-    header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型"<<"";
+    header_user << "姓名" << "身份证号码" << "用户名" << "密码" << "联系电话" << "优惠类型" << "";
     tree_widget_user* list_user = new tree_widget_user(w);
     list_user->resize(1567, 680);
     list_user->move(353, 298);
@@ -396,7 +396,7 @@ widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total
     button_confirm_add->setText("确认");
     button_confirm_add->setFont(QFont("Microsoft YaHei UI", 16));
 
-    QObject::connect(button_confirm_add, QPushButton::clicked, window_add_user, widget_add_user::add_user);
+    QObject::connect(button_confirm_add, &QPushButton::clicked, window_add_user, &widget_add_user::add_user);
 
     QMessageBox* box_empty_input = new QMessageBox();
     box_empty_input->setWindowTitle("错误");
@@ -407,7 +407,7 @@ widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total
     box_empty_input->setIcon(QMessageBox::Critical);
     box_empty_input->setWindowModality(Qt::ApplicationModal);
 
-    QObject::connect(window_add_user, widget_add_user::empty_input, box_empty_input, QMessageBox::show);
+    QObject::connect(window_add_user, &widget_add_user::empty_input, box_empty_input, &QMessageBox::show);
 
     QMessageBox* box_add_success = new QMessageBox();
     box_add_success->setWindowTitle("成功");
@@ -417,12 +417,12 @@ widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total
     box_add_success->setWindowIcon(QIcon(":/ico/PTM.ico"));
     box_add_success->setIcon(QMessageBox::Information);
     box_add_success->setWindowModality(Qt::ApplicationModal);
-    QObject::connect(window_add_user, widget_add_user::add_success, box_add_success, QMessageBox::show);
-    QObject::connect(window_add_user, widget_add_user::add_success, window_add_user, widget_add_user::close);
-    QObject::connect(window_add_user, widget_add_user::add_success, total, label_total::add_total);
+    QObject::connect(window_add_user, &widget_add_user::add_success, box_add_success, &QMessageBox::show);
+    QObject::connect(window_add_user, &widget_add_user::add_success, window_add_user, &widget_add_user::close);
+    QObject::connect(window_add_user, &widget_add_user::add_success, total, &label_total::add_total);
     for(int i = 0; i < 6; i++)
     {
-        QObject::connect(window_add_user, widget_add_user::add_success, texts[i], line_edit_add::clear);
+        QObject::connect(window_add_user, &widget_add_user::add_success, texts[i], &line_edit_add::clear);
     }
 
     QPushButton* button_cancel_add = new QPushButton(window_add_user);
@@ -431,7 +431,7 @@ widget_add_user* create_window_add_user(tree_widget_user* list_user, label_total
     button_cancel_add->setText("取消");
     button_cancel_add->setFont(QFont("Microsoft YaHei UI", 16));
 
-    QObject::connect(button_cancel_add, QPushButton::clicked, window_add_user, widget_add_user::close);
+    QObject::connect(button_cancel_add, &QPushButton::clicked, window_add_user, &widget_add_user::close);
 
     window_add_user->setAttribute(Qt::WA_QuitOnClose, false);
 
@@ -445,6 +445,7 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     window_edit_user->setPalette(QPalette(Qt::white));
     window_edit_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
     window_edit_user->setWindowModality(Qt::ApplicationModal);
+    window_edit_user->list_user = list_user;
 
     QLabel** labels = new QLabel*[6];
     line_edit_edit** texts = new line_edit_edit*[6];
@@ -474,7 +475,7 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     button_confirm_edit->setText("确认");
     button_confirm_edit->setFont(QFont("Microsoft YaHei UI", 16));
 
-    QObject::connect(button_confirm_edit, QPushButton::clicked, window_edit_user, widget_add_user::edit_user);
+    QObject::connect(button_confirm_edit, &QPushButton::clicked, window_edit_user, &widget_edit_user::edit_user);
 
     QMessageBox* box_empty_input = new QMessageBox();
     box_empty_input->setWindowTitle("错误");
@@ -485,21 +486,21 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     box_empty_input->setIcon(QMessageBox::Critical);
     box_empty_input->setWindowModality(Qt::ApplicationModal);
 
-    QObject::connect(window_edit_user, widget_edit_user::empty_input, box_empty_input, QMessageBox::show);
+    QObject::connect(window_edit_user, &widget_edit_user::empty_input, box_empty_input, &QMessageBox::show);
 
     QMessageBox* box_edit_success = new QMessageBox();
     box_edit_success->setWindowTitle("成功");
-    box_edit_success->setText("添加新用户信息成功。");
+    box_edit_success->setText("编辑用户信息成功。");
     box_edit_success->addButton("确定", QMessageBox::AcceptRole);
     box_edit_success->setFont(QFont("Microsoft YaHei UI", 10));
     box_edit_success->setWindowIcon(QIcon(":/ico/PTM.ico"));
     box_edit_success->setIcon(QMessageBox::Information);
     box_edit_success->setWindowModality(Qt::ApplicationModal);
-    QObject::connect(window_edit_user, widget_edit_user::edit_success, box_edit_success, QMessageBox::show);
-    QObject::connect(window_edit_user, widget_edit_user::edit_success, window_edit_user, widget_edit_user::close);
+    QObject::connect(window_edit_user, &widget_edit_user::edit_success, box_edit_success, &QMessageBox::show);
+    QObject::connect(window_edit_user, &widget_edit_user::edit_success, window_edit_user, &widget_edit_user::close);
     for(int i = 0; i < 6; i++)
     {
-        QObject::connect(window_edit_user, widget_edit_user::edit_success, texts[i], line_edit_edit::clear);
+        QObject::connect(window_edit_user, &widget_edit_user::edit_success, texts[i], &line_edit_edit::clear);
     }
 
     QPushButton* button_cancel_edit = new QPushButton(window_edit_user);
@@ -508,7 +509,7 @@ widget_edit_user* create_window_edit_user(tree_widget_user* list_user)
     button_cancel_edit->setText("取消");
     button_cancel_edit->setFont(QFont("Microsoft YaHei UI", 16));
 
-    QObject::connect(button_cancel_edit, QPushButton::clicked, window_edit_user, widget_edit_user::close);
+    QObject::connect(button_cancel_edit, &QPushButton::clicked, window_edit_user, &widget_edit_user::close);
 
     window_edit_user->setAttribute(Qt::WA_QuitOnClose, false);
 

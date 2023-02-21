@@ -26,6 +26,8 @@ public:
     void func_switch_search_type();
     void create_list_widget(Customer* head);
     void func_open_window_add_and_edit_user();
+    void func_del_user();
+    void search_user();
 
 public slots:
     void show();

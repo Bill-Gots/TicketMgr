@@ -14,7 +14,7 @@ void page_user::create_page()
     button_edit_user = create_button_edit_user(w);
     button_del_user = create_button_del_user(w);
     label_total_user = create_label_total_user(w);
-    window_add_user = create_window_add_user(list_user,label_total_user);
+    window_add_user = create_window_add_user(list_user, label_total_user);
     window_edit_user = create_window_edit_user(list_user);
     QObject::connect(list_user, tree_widget_user::itemClicked, button_edit_user, push_button_edit_user::set_enabled);
     QObject::connect(list_user, tree_widget_user::itemClicked, button_del_user, push_button_del_user::set_enabled);
@@ -47,7 +47,7 @@ void page_user::func_switch_search_type()
 
     QMenu* menu_search = new QMenu(button_search_user);
     button_switch_search_user->menu = menu_search;
-    QAction* action_search[6];
+    QAction** action_search = new QAction*[6];
     for(int i = 0; i < 6; i = i + 1)
     {
         action_search[i] = new QAction(menu_search);
@@ -57,16 +57,18 @@ void page_user::func_switch_search_type()
         button_switch_search_user->search_type_group->addAction(action_search[i]);
     }
     button_switch_search_user->setMenu(menu_search);
+    button_search_user->action_search = action_search;
 
     button_search_user->search_type_group = button_switch_search_user->search_type_group;
-    QObject::connect(button_switch_search_user->search_type_group, QActionGroup::triggered, button_search_user, push_button_search_user::change_text);
+    QObject::connect(button_switch_search_user->search_type_group, &QActionGroup::triggered, button_search_user, &push_button_search_user::change_text);
     action_search[0]->trigger();
 }
 
 void page_user::func_open_window_add_and_edit_user()
 {
-    QObject::connect(button_add_user, push_button_add_user::clicked, window_add_user, widget_add_user::show);
-    QObject::connect(button_edit_user, push_button_edit_user::clicked, window_edit_user, widget_edit_user::show);
+    QObject::connect(button_add_user, &push_button_add_user::clicked, window_add_user, &widget_add_user::show);
+    QObject::connect(button_edit_user, &push_button_edit_user::clicked, window_edit_user, &widget_edit_user::show);
+    QObject::connect(button_edit_user, &push_button_edit_user::clicked, window_edit_user, &widget_edit_user::show_info);
 }
 
 void page_user::show()
@@ -97,3 +99,47 @@ void page_user::set_hidden()
     label_total_user->setHidden(true);
 }
 
+void page_user::func_del_user()
+{
+    QMessageBox* box_del_user = new QMessageBox;
+    box_del_user->setWindowTitle("删除用户");
+    box_del_user->setText("确认删除该用户信息吗？");
+    box_del_user->addButton("确定", QMessageBox::AcceptRole);
+    box_del_user->addButton("取消", QMessageBox::RejectRole);
+    box_del_user->setFont(QFont("Microsoft YaHei UI", 10));
+    box_del_user->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    box_del_user->setIcon(QMessageBox::Question);
+    box_del_user->setWindowModality(Qt::ApplicationModal);
+
+    QObject::connect(button_del_user, &push_button_del_user::clicked, box_del_user, &QMessageBox::show);
+
+    list_user->confirm_del_user = box_del_user->buttons().first();
+    QObject::connect(box_del_user, &QMessageBox::buttonClicked, list_user, &tree_widget_user::del_user);
+
+    QMessageBox* box_del_success = new QMessageBox;
+    box_del_success->setWindowTitle("删除成功");
+    box_del_success->setText("删除用户信息成功。");
+    box_del_success->addButton("确定", QMessageBox::AcceptRole);
+    box_del_success->setFont(QFont("Microsoft YaHei UI", 10));
+    box_del_success->setWindowIcon(QIcon(":/ico/PTM.ico"));
+    box_del_success->setIcon(QMessageBox::Information);
+    box_del_success->setWindowModality(Qt::ApplicationModal);
+    QObject::connect(list_user, &tree_widget_user::del_success, box_del_success, &QMessageBox::show);
+    QObject::connect(list_user, &tree_widget_user::del_success, button_edit_user, &push_button_edit_user::set_disabled);
+    QObject::connect(list_user, &tree_widget_user::del_success, label_total_user, &label_total::minus_total);
+    QObject::connect(label_total_user, &label_total::no_data, button_del_user, &push_button_del_user::set_disabled);
+}
+
+void page_user::search_user()
+{
+    QString search_type;
+    for(int i = 0; i < 6; i++)
+    {
+        if(button_search_user->search_type_group->checkedAction() == button_search_user->action_search[i])
+        {
+            //search_type = list_user->headerDaa;
+        }
+    }
+
+    QString seach_text = text_search->text();
+}

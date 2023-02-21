@@ -19,8 +19,10 @@ public slots:
 
 class label_total:public QLabel
 {
-public:
     Q_OBJECT
+
+signals:
+    void no_data();
 
 public:
     int total = 0;
@@ -32,6 +34,7 @@ public:
 public slots:
     void update_total(int t);
     void add_total();
+    void minus_total();
 };
 
 #endif // LABEL_H

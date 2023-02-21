@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     user_info->func_switch_search_type();
     //user_info->create_list_widget(head_customer);
     user_info->func_open_window_add_and_edit_user();
+    user_info->func_del_user();
 
 
     w->setAttribute(Qt::WA_QuitOnClose, true);

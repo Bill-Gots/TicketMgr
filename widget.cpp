@@ -85,9 +85,12 @@ widget_edit_user::~widget_edit_user()
 
 }
 
-void show_info()
+void widget_edit_user::show_info()
 {
-
+    for (int i = 0; i < 6; i++)
+    {
+        texts_input[i]->setText(list_user->selectedItems().first()->text(i));
+    }
 }
 
 void widget_edit_user::edit_user()
@@ -106,7 +109,7 @@ void widget_edit_user::edit_user()
     new_user->username = texts_input[2]->text();
     new_user->password = texts_input[3]->text();
     new_user->telephone = texts_input[4]->text();
-    for (int i = 0;i < 4; i++)
+    for(int i = 0; i < 4; i++)
     {
         if(texts_input[5]->text() == str_discount_type[i])
         {
@@ -114,11 +117,11 @@ void widget_edit_user::edit_user()
         }
     }
 
-    QStringList data;
-    data << new_user->name << new_user->id << new_user->username << new_user->password << new_user->telephone << str_discount_type[new_user->discount_type];
-    QTreeWidgetItem* new_item = new QTreeWidgetItem(list_user, data);
-    list_user->addTopLevelItem(new_item);
-    func_set_alignment_and_width(list_user, new_item);
-    emit add_success();
+    for(int i = 0; i < 6; i++)
+    {
+        list_user->selectedItems().first()->setText(i, texts_input[i]->text());
+    }
+
+    emit edit_success();
 }
 

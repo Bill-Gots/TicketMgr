@@ -33,6 +33,7 @@ signals:
 
 public:
     QActionGroup* search_type_group;
+    QAction** action_search;
 
     push_button_search_user(const QString text = "", QWidget* parent = Q_NULLPTR);
 

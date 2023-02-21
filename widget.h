@@ -67,7 +67,7 @@ class widget_edit_user: public QWidget
     Q_OBJECT
 signals:
     void empty_input();
-    void add_success();
+    void edit_success();
 
 public:
     tree_widget_user* list_user;

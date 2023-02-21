@@ -25,3 +25,13 @@ void label_total::add_total()
     total++;
     this->setText("现有" + usage + "信息总数：" + QString::number(total));
 }
+
+void label_total::minus_total()
+{
+    total--;
+    this->setText("现有" + usage + "信息总数：" + QString::number(total));
+    if(total == 0)
+    {
+        emit no_data();
+    }
+}
