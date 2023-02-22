@@ -192,6 +192,7 @@ public slots:
 
 };
 
+const QString search_type_order[7] = {"查询订单编号", "查询姓名", "查询身份证号码", "查询车次", "查询发车时间", "查询订票时间", "查询订票数量"};
 class push_button_search_order: public QPushButton
 {
     Q_OBJECT
@@ -275,8 +276,6 @@ public slots:
 class push_button_back: public QPushButton
 {
     Q_OBJECT
-
-signals:
 
 public:
 

@@ -894,11 +894,6 @@ bool page_ticket::func_check(int id, QString text)
 void page_ticket::create_list_widget(Ticket* head)
 {
     Ticket* t = head;
-    if(t == NULL)
-    {
-        //t =
-    }
-
     QStringList data;
     while(t->next != NULL)
     {
@@ -1392,11 +1387,6 @@ bool page_order::func_check(int id, QString text)
 void page_order::create_list_widget(Order* head)
 {
     Order* t = head;
-    if(t == NULL)
-    {
-        //t =
-    }
-
     QStringList data;
     while(t->next != NULL)
     {

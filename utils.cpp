@@ -215,7 +215,7 @@ label_system_time* create_label_systime(main_widget* w)
 }
 
 
-/*
+
 void func_switch_pages(QButtonGroup* menu, page_user* user_info, page_ticket* ticket_info, page_order* order_info)
 {
     QObject::connect(menu->button(0), &QPushButton::clicked, user_info, &page_user::show);
@@ -229,4 +229,4 @@ void func_switch_pages(QButtonGroup* menu, page_user* user_info, page_ticket* ti
     QObject::connect(menu->button(2), &QPushButton::clicked, user_info, &page_user::set_hidden);
     QObject::connect(menu->button(2), &QPushButton::clicked, ticket_info, &page_ticket::set_hidden);
     QObject::connect(menu->button(2), &QPushButton::clicked, order_info, &page_order::show);
-}*/
+}

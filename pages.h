@@ -13,13 +13,15 @@
 
 void func_set_alignment_and_width(QTreeWidget* list, QTreeWidgetItem* item, int width = 215);
 
-class page_user
+class page_user: public QObject
 {
+    Q_OBJECT
+
 public:
     main_widget* w;
     QProgressBar* load_progress_bar;
     tree_widget_user* list_user;
-    QLabel* label_instruct_search;
+    label_instruct* label_instruct_search;
     line_edit_search* text_search;
     push_button_search_user* button_search_user;
     push_button_switch_search_user* button_switch_search_user;
@@ -33,7 +35,7 @@ public:
     QMessageBox* add_user_success, add_user_failed;
 
     tree_widget_user* create_tree_widget_user(main_widget* w);
-    QLabel* create_label_instruct_search_user(main_widget* w);
+    label_instruct* create_label_instruct_search_user(main_widget* w);
     line_edit_search* create_text_search_user(main_widget* w);
     push_button_search_user* create_button_search_user(main_widget* w);
     push_button_switch_search_user* create_button_switch_search_user(main_widget* w);
@@ -46,23 +48,28 @@ public:
     widget_edit_user* create_window_edit_user(tree_widget_user* list_user);
     void create_page();
     void func_switch_search_type();
-    void create_list_widget(Customer* head);
+    bool func_check(int id, QString text);
     void func_open_window_add_and_edit_user();
     void func_del_user();
-    void search_user();
+    void func_search_user();
 
 public slots:
     void show();
     void set_hidden();
+    void search_user();
+    void create_list_widget(Customer* head = NULL);
+    void initial_list_widget();
 };
 
-class page_ticket
+class page_ticket: public QObject
 {
+    Q_OBJECT
+
 public:
     main_widget* w;
     QProgressBar* load_progress_bar;
     tree_widget_ticket* list_ticket;
-    QLabel* label_instruct_search;
+    label_instruct* label_instruct_search;
     line_edit_search* text_search;
     push_button_search_ticket* button_search_ticket;
     push_button_switch_search_ticket* button_switch_search_ticket;
@@ -76,7 +83,7 @@ public:
     QMessageBox* add_ticket_success, add_ticket_failed;
 
     tree_widget_ticket* create_tree_widget_ticket(main_widget* w);
-    QLabel* create_label_instruct_search_ticket(main_widget* w);
+    label_instruct* create_label_instruct_search_ticket(main_widget* w);
     line_edit_search* create_text_search_ticket(main_widget* w);
     push_button_search_ticket* create_button_search_ticket(main_widget* w);
     push_button_switch_search_ticket* create_button_switch_search_ticket(main_widget* w);
@@ -89,23 +96,28 @@ public:
     widget_edit_ticket* create_window_edit_ticket(tree_widget_ticket* list_ticket);
     void create_page();
     void func_switch_search_type();
-    void create_list_widget(Ticket* head);
+    bool func_check(int id, QString text);
     void func_open_window_add_and_edit_ticket();
     void func_del_ticket();
-    void search_ticket();
+    void func_search_ticket();
 
 public slots:
     void show();
     void set_hidden();
+    void search_ticket();
+    void create_list_widget(Ticket* head = NULL);
+    void initial_list_widget();
 };
 
-class page_order
+class page_order: public QObject
 {
+    Q_OBJECT
+
 public:
     main_widget* w;
     QProgressBar* load_progress_bar;
     tree_widget_order* list_order;
-    QLabel* label_instruct_search;
+    label_instruct* label_instruct_search;
     line_edit_search* text_search;
     push_button_search_order* button_search_order;
     push_button_switch_search_order* button_switch_search_order;
@@ -119,7 +131,7 @@ public:
     QMessageBox* add_order_success, add_order_failed;
 
     tree_widget_order* create_tree_widget_order(main_widget* w);
-    QLabel* create_label_instruct_search_order(main_widget* w);
+    label_instruct* create_label_instruct_search_order(main_widget* w);
     line_edit_search* create_text_search_order(main_widget* w);
     push_button_search_order* create_button_search_order(main_widget* w);
     push_button_switch_search_order* create_button_switch_search_order(main_widget* w);
@@ -132,14 +144,17 @@ public:
     widget_edit_order* create_window_edit_order(tree_widget_order* list_order);
     void create_page();
     void func_switch_search_type();
-    void create_list_widget(Customer* head);
+    bool func_check(int id, QString text);
     void func_open_window_add_and_edit_order();
     void func_del_order();
-    void search_order();
+    void func_search_order();
 
 public slots:
     void show();
     void set_hidden();
+    void search_order();
+    void create_list_widget(Order* head = NULL);
+    void initial_list_widget();
 };
 
 #endif // PAGES_H

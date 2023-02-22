@@ -51,6 +51,6 @@ QButtonGroup* create_menu(main_widget* w);
 label_system_time* create_label_systime(main_widget* w);
 
 
-//void func_switch_pages(QButtonGroup* menu, page_user* user_info, page_ticket* ticket_info, page_order* order_info);
+void func_switch_pages(QButtonGroup* menu, page_user* user_info, page_ticket* ticket_info, page_order* order_info);
 
 #endif // UTILS_H

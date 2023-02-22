@@ -26,7 +26,6 @@ class Customer
 public:
     QString name, id, username, password, telephone;
     int discount_type;
-    Order* orders;
     Customer *next;
 };
 

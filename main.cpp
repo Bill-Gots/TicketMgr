@@ -65,13 +65,39 @@ int main(int argc, char *argv[])
     //user_info->create_list_widget(head_customer);
     user_info->func_open_window_add_and_edit_user();
     user_info->func_del_user();
+    user_info->func_search_user();
+
+    page_ticket* ticket_info = new page_ticket;
+    ticket_info->w = w;
+    ticket_info->load_progress_bar = load_progress_bar;
+    ticket_info->create_page();
+    ticket_info->func_switch_search_type();
+    //ticket_info->create_list_widget(head_customer);
+    ticket_info->func_open_window_add_and_edit_ticket();
+    ticket_info->func_del_ticket();
+    ticket_info->func_search_ticket();
+
+    page_order* order_info = new page_order;
+    order_info->w = w;
+    order_info->load_progress_bar = load_progress_bar;
+    order_info->create_page();
+    order_info->func_switch_search_type();
+    //order_info->create_list_widget(head_customer);
+    order_info->func_open_window_add_and_edit_order();
+    order_info->func_del_order();
+    order_info->func_search_order();
+
+
+
+
 
 
     w->setAttribute(Qt::WA_QuitOnClose, true);
 
 
 
-    //func_switch_pages(menu);
+    func_switch_pages(menu, user_info, ticket_info, order_info);
+    menu->button(0)->click();
     return a.exec();
 }
 
